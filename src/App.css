@@ -1,0 +1,83 @@
+tr {
+    display: flex;
+}
+
+td {
+    width: 30px;
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.crowds td {
+    height: 30px;
+}
+
+.crowds div {
+    font-size: 20px;
+}
+
+tr.camels {
+    background-color: beige;
+}
+
+.camels td {
+    height: 110px;
+    flex-direction: column-reverse;
+}
+
+.camels div {
+    width: 20px;
+    height: 20px;
+    border: 1px solid black;
+}
+
+.camels #camel-1 {
+    color: red;
+    background-color: red;
+}
+.camels #camel-2 {
+    color: yellow;
+    background-color: yellow;
+}
+.camels #camel-3 {
+    color: blue;
+    background-color: blue;
+}
+.camels #camel-4 {
+    color: green;
+    background-color: green;
+}
+.camels #camel-5 {
+    color: orange;
+    background-color: orange;
+}
+.camels #camel--1 {
+    color: black;
+    background-color: black;
+}
+.camels #camel--2 {
+    color: white;
+    background-color: white;
+}
+
+#bet-1 {
+    border: 5px solid  red;
+}
+
+#bet-2 {
+    border: 5px solid  yellow;
+}
+
+#bet-3 {
+    border: 5px solid  blue;
+}
+
+#bet-4 {
+    border: 5px solid  green;
+}
+
+#bet-5 {
+    border: 5px solid  orange;
+}
