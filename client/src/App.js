@@ -54,7 +54,7 @@ function Bets(props) {
 
 function LongBet(props) {
   const { player } = props;
-  return <div id={`long-bet-${player}`}>{player}</div>;
+  return <td class={`long-bet-${player}`}>{player}</td>;
 }
 
 function LongBets(props) {
@@ -62,11 +62,9 @@ function LongBets(props) {
   const renderedToWin = toWin.map((p) => <LongBet player={p} />);
   const renderedToLose = toLose.map((p) => <LongBet player={p} />);
   return (
-    <table>
-      <tr class="placed-bets">
-        <td class="placed-bets-to-win">{renderedToWin}</td>
-        <td class="placed-bets-to-lose">{renderedToLose}</td>
-      </tr>
+    <table class="placed-bets">
+      <tr class="placed-bets-to-win">{renderedToWin}</tr>
+      <tr class="placed-bets-to-lose">{renderedToLose}</tr>
     </table>
   );
 }
