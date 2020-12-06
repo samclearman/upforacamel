@@ -4,7 +4,7 @@ import "./App.css";
 
 function TrackTile(props) {
   const { camels } = props;
-  const renderedCamels = camels.map((c) => <div id={`camel-${c}`}>c</div>);
+  const renderedCamels = camels.map((c) => <div id={`camel-${c}`}>{c}</div>);
   return <td>{renderedCamels}</td>;
 }
 
@@ -52,6 +52,25 @@ function Bets(props) {
   );
 }
 
+function LongBet(props) {
+  const { player } = props;
+  return <div id={`long-bet-${player}`}>{player}</div>;
+}
+
+function LongBets(props) {
+  const { toWin, toLose } = props;
+  const renderedToWin = toWin.map((p) => <LongBet player={p} />);
+  const renderedToLose = toLose.map((p) => <LongBet player={p} />);
+  return (
+    <table>
+      <tr class="placed-bets">
+        <td class="placed-bets-to-win">{renderedToWin}</td>
+        <td class="placed-bets-to-lose">{renderedToLose}</td>
+      </tr>
+    </table>
+  );
+}
+
 function App() {
   return (
     <>
@@ -94,6 +113,7 @@ function App() {
         ]}
       />
       <Bets available={[5, 3, 2, 2, 5]} />
+      <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
     </>
   );
 }
