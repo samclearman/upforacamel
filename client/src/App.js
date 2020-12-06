@@ -15,7 +15,7 @@ function Crowd(props) {
     const glyph = direction > 0 ? "→" : "←";
     return (
       <td>
-        <div id={`arrow-${player}`}>{glyph}</div>
+        <div class={`arrow-${player}`}>{glyph}</div>
       </td>
     );
   }
@@ -69,6 +69,22 @@ function LongBets(props) {
   );
 }
 
+function Die(props) {
+  const { camel, roll } = props;
+  return <td class={`die-${camel}`}>{roll}</td>;
+}
+
+function Dice(props) {
+  const { rolled } = props;
+  const renderedDice = rolled.map(({ camel, roll }) => (
+    <Die camel={camel} roll={roll} />
+  ));
+  return (
+    <table class="rolled-dice">
+      <tr>{renderedDice}</tr>
+    </table>
+  );
+}
 function App() {
   return (
     <>
@@ -98,7 +114,7 @@ function App() {
           null,
           { player: 1, direction: 1 },
           null,
-          null,
+          { player: 2, direction: -1 },
           null,
           null,
           null,
@@ -117,6 +133,14 @@ function App() {
 
       <h3>Long Bets</h3>
       <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
+
+      <h3>Rolls</h3>
+      <Dice
+        rolled={[
+          { camel: 2, roll: 3 },
+          { camel: -1, roll: 1 },
+        ]}
+      />
     </>
   );
 }
