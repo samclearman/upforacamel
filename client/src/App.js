@@ -72,6 +72,7 @@ function LongBets(props) {
 function App() {
   return (
     <>
+      <h3>Track</h3>
       <Track
         positions={[
           [2, 1],
@@ -110,7 +111,11 @@ function App() {
           null,
         ]}
       />
+
+      <h3>Bets</h3>
       <Bets available={[5, 3, 2, 2, 5]} />
+
+      <h3>Long Bets</h3>
       <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
     </>
   );
