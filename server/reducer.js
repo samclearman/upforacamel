@@ -1,8 +1,7 @@
 import _ from "lodash"
 import util from "util"
-import { isContext } from "vm"
 
-function reduceEvent(currentState, event) {
+export function reduceEvent(currentState, event) {
     validateEvent(currentState, event)
     
     var currentPlayer = event.player 
@@ -97,9 +96,11 @@ function updateTilePosition(currentState, event) {
 
 var colorCamels = ["red", "blue", "purple", "yellow", "green"]
 var bwCamels = ["black", "white"]
+
 function isColorCamel(color) {
     return colorCamels.includes(color) 
 }
+
 function updateCamelPosition(currentState, event) {
     var rolledDiceColor = currentState.remainingDice[Math.floor(Math.random() * currentState.remainingDice.length)];
     var rolledDiceNumber = [1, 2, 3][Math.floor(Math.random(3))]
@@ -318,6 +319,10 @@ var initialGameState = {
         },
     },
     "events": []
+}
+
+export function getInitialGameState() {
+    return _.cloneDeep(initialGameState)
 }
 
 var events = [
