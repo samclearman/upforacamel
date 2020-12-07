@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { io } from 'socket.io-client';
+import { io } from "socket.io-client";
 import "./App.css";
-
 
 function TrackTile(props) {
   const { camels } = props;
@@ -103,68 +102,153 @@ function Player(props) {
   );
 }
 
+function camelToNumber(camelColor) {
+  switch (camelColor) {
+    case "red":
+      return 1;
+    case "yellow":
+      return 2;
+    case "blue":
+      return 3;
+    case "green":
+      return 4;
+    case "purple":
+      return 5;
+    case "black":
+      return -1;
+    case "white":
+      return -2;
+  }
+}
+
+function tileToNumber(tileSymbol) {
+  switch (tileSymbol) {
+    case "+":
+      return 1;
+    case "-":
+      return -1;
+  }
+}
+
+function getPositions(gameState) {
+  return Object.values(gameState.track).map((v) =>
+    v.camels.map((c) => camelToNumber(c))
+  );
+}
+
+function getCrowds(gameState) {
+  // return Object.values(gameState.track).map((v) =>
+  //   v.tiles.map((c) => tileToNumber(t))
+  // );
+  const crowds = [];
+  for (let i = 0; i < 16; i++) {
+    crowds.push(null);
+    for (const n in gameState.players) {
+      const v = Object.values(gameState.players[n].legs).slice(-1)[0]
+        .desertTile;
+      if (Math.abs(v) === i) {
+        crowds[i] = { player: n + 1, direction: v ? v / Math.abs(v) : 1 };
+      }
+    }
+  }
+  return crowds;
+}
+
+function getAvailableBets(gameState) {
+  const bets = [];
+  for (const c in gameState.remainingLegBets) {
+    bets[camelToNumber(c) - 1] = gameState.remainingLegBets[c].slice(-1)[0];
+  }
+  return bets;
+}
+
+function getPlayers(gameState) {
+  return Object.entries(gameState.players).map(([n, p]) => {
+    const lastLeg = Object.values(p.legs).slice(-1)[0];
+    const bets = [];
+    for (const c in lastLeg.legBets) {
+      for (const payout of lastLeg.legBets[c]) {
+        bets.push({ camel: camelToNumber(c), payout });
+      }
+    }
+    return { name: n, money: 0, bets };
+  });
+}
 
 function makeSocket() {
-  const socket = io('http://localhost:3030');
+  const socket = io("http://localhost:3030");
   socket.on("connect", () => {
     console.log("connect", socket.id);
-    socket.emit("new_user", socket.id);
-    socket.on("game_state", (gameState) => {
-      console.log("got game state ", gameState);
-    });
-    socket.emit("event", {
-        "type": "makeLegBet",
-        "player": "1",
-        "data": {
-            "color": "yellow"
-        },
-    });
-  });  
+  });
+  return socket;
 }
 
 function App() {
-  const [socket, setSocket] = useState(() => {
-    const initialState = makeSocket();
-    return initialState;
-  });
-  const positions = [
-    [2, 1],
-    [3],
-    [4, 5],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [-1],
-    [-2],
-  ];
-  const crowds = [
-    null,
-    null,
-    null,
-    { player: 1, direction: 1 },
-    null,
-    { player: 2, direction: -1 },
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-  ];
+  const [positions, setPositions] = useState([]);
+  const [crowds, setCrowds] = useState([]);
+  const [availableBets, setAvailableBets] = useState([]);
+  const [players, setPlayers] = useState([]);
 
-  const availableBets = [5, 3, 2, 2, 5];
+  const [socket, setSocket] = useState(() => {
+    return makeSocket();
+  });
+  socket.on("game_state", (gameState) => {
+    console.log(gameState);
+    setPositions(getPositions(gameState));
+    setCrowds(getCrowds(gameState));
+    setAvailableBets(getAvailableBets(gameState));
+    setPlayers(getPlayers(gameState));
+  });
+
+  // socket.on("game_state", (gameState) => {
+  //   console.log("got game state ", gameState);
+  // });
+  // socket.emit("event", {
+  //   type: "makeLegBet",
+  //   player: "1",
+  //   data: {
+  //     color: "yellow",
+  //   },
+  // });
+
+  // const positions = [
+  //   [2, 1],
+  //   [3],
+  //   [4, 5],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [],
+  //   [-1],
+  //   [-2],
+  // ];
+  // const crowds = [
+  //   null,
+  //   null,
+  //   null,
+  //   { player: 1, direction: 1 },
+  //   null,
+  //   { player: 2, direction: -1 },
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  //   null,
+  // ];
+
+  // const availableBets = [5, 3, 2, 2, 5];
   const longBets = {
     toLose: [1, 4, 1],
     toWin: [5, 3, 2, 2, 5],
@@ -173,26 +257,26 @@ function App() {
     { camel: 2, roll: 3 },
     { camel: -1, roll: 1 },
   ];
-  const players = [
-    { name: "sam", money: 1, bets: [{ camel: 2, payout: 5 }] },
-    { name: "cat", money: 1, bets: [] },
-    {
-      name: "steven",
-      money: 0,
-      bets: [
-        { camel: 3, payout: 5 },
-        { camel: 4, payout: 3 },
-      ],
-    },
-    {
-      name: "some asshole with a really long name",
-      money: 0,
-      bets: [
-        { camel: 4, payout: 5 },
-        { camel: 3, payout: 3 },
-      ],
-    },
-  ];
+  // const players = [
+  //   { name: "sam", money: 1, bets: [{ camel: 2, payout: 5 }] },
+  //   { name: "cat", money: 1, bets: [] },
+  //   {
+  //     name: "steven",
+  //     money: 0,
+  //     bets: [
+  //       { camel: 3, payout: 5 },
+  //       { camel: 4, payout: 3 },
+  //     ],
+  //   },
+  //   {
+  //     name: "some asshole with a really long name",
+  //     money: 0,
+  //     bets: [
+  //       { camel: 4, payout: 5 },
+  //       { camel: 3, payout: 3 },
+  //     ],
+  //   },
+  // ];
   return (
     <div class="container">
       <div class="game">
