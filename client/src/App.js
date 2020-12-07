@@ -4,7 +4,17 @@ import "./App.css";
 
 function TrackTile(props) {
   const { camels } = props;
-  const renderedCamels = camels.map((c) => <div id={`camel-${c}`}>{c}</div>);
+
+  const renderedCamels = camels.map((c) => {
+    const camelStyle = {
+      width: "20px",
+      height: "20px",
+      border: "1px solid black",
+      color: camelToColor(c),
+      backgroundColor: camelToColor(c),
+    };
+    return <div style={camelStyle}>{c}</div>;
+  });
   return <td>{renderedCamels}</td>;
 }
 
@@ -39,7 +49,10 @@ function Bet(props) {
   if (!bet) {
     return <td></td>;
   }
-  return <td class={`bet-${camel}`}>{bet}</td>;
+  const betStyle = {
+    border: `5px solid ${camelToColor(camel)}`,
+  };
+  return <td style={betStyle}>{bet}</td>;
 }
 
 function Bets(props) {
@@ -71,7 +84,11 @@ function LongBets(props) {
 
 function Die(props) {
   const { camel, roll } = props;
-  return <td class={`die-${camel}`}>{roll}</td>;
+  const dieStyle = {
+    border: `5px solid ${camelToColor(camel)}`,
+  };
+
+  return <td style={dieStyle}>{roll}</td>;
 }
 
 function Dice(props) {
@@ -118,6 +135,25 @@ function camelToNumber(camelColor) {
       return -1;
     case "white":
       return -2;
+  }
+}
+
+function camelToColor(camelNumber) {
+  switch (camelNumber) {
+    case 1:
+      return "red";
+    case 2:
+      return "yellow";
+    case 3:
+      return "blue";
+    case 4:
+      return "green";
+    case 5:
+      return "purple";
+    case -1:
+      return "black";
+    case -2:
+      return "white";
   }
 }
 
@@ -200,55 +236,6 @@ function App() {
     setPlayers(getPlayers(gameState));
   });
 
-  // socket.on("game_state", (gameState) => {
-  //   console.log("got game state ", gameState);
-  // });
-  // socket.emit("event", {
-  //   type: "makeLegBet",
-  //   player: "1",
-  //   data: {
-  //     color: "yellow",
-  //   },
-  // });
-
-  // const positions = [
-  //   [2, 1],
-  //   [3],
-  //   [4, 5],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [],
-  //   [-1],
-  //   [-2],
-  // ];
-  // const crowds = [
-  //   null,
-  //   null,
-  //   null,
-  //   { player: 1, direction: 1 },
-  //   null,
-  //   { player: 2, direction: -1 },
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  //   null,
-  // ];
-
-  // const availableBets = [5, 3, 2, 2, 5];
   const longBets = {
     toLose: [1, 4, 1],
     toWin: [5, 3, 2, 2, 5],
@@ -257,29 +244,17 @@ function App() {
     { camel: 2, roll: 3 },
     { camel: -1, roll: 1 },
   ];
-  // const players = [
-  //   { name: "sam", money: 1, bets: [{ camel: 2, payout: 5 }] },
-  //   { name: "cat", money: 1, bets: [] },
-  //   {
-  //     name: "steven",
-  //     money: 0,
-  //     bets: [
-  //       { camel: 3, payout: 5 },
-  //       { camel: 4, payout: 3 },
-  //     ],
-  //   },
-  //   {
-  //     name: "some asshole with a really long name",
-  //     money: 0,
-  //     bets: [
-  //       { camel: 4, payout: 5 },
-  //       { camel: 3, payout: 3 },
-  //     ],
-  //   },
-  // ];
+
+  const containerStyle = {
+    display: "flex",
+    justifyContent: "center",
+  };
+  const playersStyle = {
+    marginLeft: "30px",
+  };
   return (
-    <div class="container">
-      <div class="game">
+    <div style={containerStyle}>
+      <div>
         <h3>Track</h3>
         <Track positions={positions} crowds={crowds} />
 
@@ -292,7 +267,7 @@ function App() {
         <h3>Rolls</h3>
         <Dice rolled={rolled} />
       </div>
-      <div class="Players">
+      <div style={playersStyle}>
         <h2>Players</h2>
         <div id="players">
           {players.map((p, i) => (
