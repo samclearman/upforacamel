@@ -93,7 +93,7 @@ function Player(props) {
   ));
   return (
     <div class={`player-${number}`}>
-      <h3>{number}</h3>
+      <h3>{player.name}</h3>
 
       <table class="player-bets">
         <tr>{renderedBets}</tr>
@@ -149,9 +149,10 @@ function App() {
     { camel: -1, roll: 1 },
   ];
   const players = [
-    { money: 1, bets: [{ camel: 2, payout: 5 }] },
-    { money: 1, bets: [] },
+    { name: "sam", money: 1, bets: [{ camel: 2, payout: 5 }] },
+    { name: "cat", money: 1, bets: [] },
     {
+      name: "steven",
       money: 0,
       bets: [
         { camel: 3, payout: 5 },
@@ -159,6 +160,7 @@ function App() {
       ],
     },
     {
+      name: "some asshole with a really long name",
       money: 0,
       bets: [
         { camel: 4, payout: 5 },
