@@ -4,7 +4,7 @@ import "./App.css";
 
 function TrackTile(props) {
   const { camels } = props;
-  const renderedCamels = camels.map((c) => <div id={`camel-${c}`}>c</div>);
+  const renderedCamels = camels.map((c) => <div id={`camel-${c}`}>{c}</div>);
   return <td>{renderedCamels}</td>;
 }
 
@@ -15,7 +15,7 @@ function Crowd(props) {
     const glyph = direction > 0 ? "→" : "←";
     return (
       <td>
-        <div id={`arrow-${player}`}>{glyph}</div>
+        <div class={`arrow-${player}`}>{glyph}</div>
       </td>
     );
   }
@@ -52,9 +52,43 @@ function Bets(props) {
   );
 }
 
+function LongBet(props) {
+  const { player } = props;
+  return <td class={`long-bet-${player}`}>{player}</td>;
+}
+
+function LongBets(props) {
+  const { toWin, toLose } = props;
+  const renderedToWin = toWin.map((p) => <LongBet player={p} />);
+  const renderedToLose = toLose.map((p) => <LongBet player={p} />);
+  return (
+    <table class="placed-bets">
+      <tr class="placed-bets-to-win">{renderedToWin}</tr>
+      <tr class="placed-bets-to-lose">{renderedToLose}</tr>
+    </table>
+  );
+}
+
+function Die(props) {
+  const { camel, roll } = props;
+  return <td class={`die-${camel}`}>{roll}</td>;
+}
+
+function Dice(props) {
+  const { rolled } = props;
+  const renderedDice = rolled.map(({ camel, roll }) => (
+    <Die camel={camel} roll={roll} />
+  ));
+  return (
+    <table class="rolled-dice">
+      <tr>{renderedDice}</tr>
+    </table>
+  );
+}
 function App() {
   return (
     <>
+      <h3>Track</h3>
       <Track
         positions={[
           [2, 1],
@@ -80,7 +114,7 @@ function App() {
           null,
           { player: 1, direction: 1 },
           null,
-          null,
+          { player: 2, direction: -1 },
           null,
           null,
           null,
@@ -93,7 +127,20 @@ function App() {
           null,
         ]}
       />
+
+      <h3>Bets</h3>
       <Bets available={[5, 3, 2, 2, 5]} />
+
+      <h3>Long Bets</h3>
+      <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
+
+      <h3>Rolls</h3>
+      <Dice
+        rolled={[
+          { camel: 2, roll: 3 },
+          { camel: -1, roll: 1 },
+        ]}
+      />
     </>
   );
 }
