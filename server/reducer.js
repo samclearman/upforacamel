@@ -9,6 +9,9 @@ export function reduceEvent(currentState, event) {
     switch(event.type) {
         case "makeLegBet":
             var selectedColor = event.data.color
+            if (currentState.remainingLegBets[selectedColor].length === 0) {
+                throw new Error("no more leg bets for color")
+            }
             var payoff = currentState.remainingLegBets[selectedColor].pop()
             // add error handling if array is empty
             currentState.players[currentPlayer]["legs"][currentLeg]["legBets"][selectedColor].push(payoff)
@@ -19,7 +22,8 @@ export function reduceEvent(currentState, event) {
         case "placeDesertTile":
             updateTilePosition(currentState, event)
             break;
-        case "makeRaceBet":
+        case "makeOverallRaceBet":
+            updateOverallRaceBet(currentState, event)
             break;
         case "pickPartner":
             break;
@@ -68,12 +72,30 @@ function validateEvent(currentState, event) {
             }
 
             break;
-        case "makeRaceBet":
+        case "makeOverallRaceBet":
+            var color = event.data.color
+
+            // player cannot make bet if they already made bet
+            var raceBets = currentState["players"][currentPlayer]["raceBets"]
+            if (raceBets["long"].includes(color) || raceBets["short"].includes(color)) {
+                throw new Error("you have already made a bet with this color")
+            }
             break;
         case "pickPartner":
             break;
         
     }
+}
+
+function updateOverallRaceBet(currentState, event) {
+    var kind = event.data.kind
+    var color = event.data.color
+    var currentPlayer = event.player
+
+    currentState["players"][currentPlayer]["raceBets"][kind].push(color)
+
+    var category = (kind === "long") ? "overallLongBets" : "overallShortBets"
+    currentState[category].push(color)
 }
 
 function updateTilePosition(currentState, event) {
@@ -135,7 +157,7 @@ function updateCamelPosition(currentState, event) {
 
     var newCamelPosition = currentCamelPosition + movement
     if (newCamelPosition > 15) {
-        throw new Error('game is over but we havent implemented yet')
+        scoreGame(currentState, camelsToMove)
     }
 
     var placeUnder = false
@@ -156,7 +178,7 @@ function updateCamelPosition(currentState, event) {
     }
 
     if (newCamelPosition > 15) {
-        throw new Error('game is over but we havent implemented yet')
+        scoreGame(currentState, camelsToMove)
     }
 
     // need to see if they land on a desert tile which can
@@ -164,8 +186,39 @@ function updateCamelPosition(currentState, event) {
     // track[newCamelPosition] = rolledDiceColor // need to add other camels too
     if (currentState.remainingDice.length === 1) {
         console.log("NEW LEG!!!")
+        var winningCamel, runnerUpCamel = getWinnerRunnerUp(currentState)
+        scoreLeg(currentState, winningCamel, runnerUpCamel)
         newLeg(currentState)
     }
+}
+
+function scoreGame(currentState, camelsToMove) {
+    var winningCamel = camelsToMove.pop()
+    var runnerUpCamel = null
+    var dummy
+    if (camelsToMove.length > 0) {
+        var runnerUpCamel = camelsToMove.pop()
+    } else {
+        runnerUpCamel, dummy = getWinnerRunnerUp(currentState)
+    }
+
+    scoreLeg(currentState, winningCamel, runnerUpCamel)
+
+    // sum up leg scores
+    var scores = {}
+    for (var i = 0; i < currentState.numberPlayers; i++) {
+        var playerLegScore = 0
+        var currentPlayer = currentState["players"][i + 1]
+        console.log("scoring, currentPlayerState", currentPlayer)
+        for (var j = 0; j <= currentState.currentLeg; j++) {
+            playerLegScore += currentPlayer["legs"][j]["score"]
+        }
+        scores[i] = playerLegScore
+    }
+    console.log(scores)
+
+    throw new Error("Game over")
+    // sum up long term scores
 }
 
 function updatePlayerScoreDesertTile(currentState, camelPosition) {
@@ -182,36 +235,39 @@ function updatePlayerScoreDesertTile(currentState, camelPosition) {
     }
 }
 
-function newLeg(currentState) {
-    currentState.remainingDice = ["red", "green", "blue", "purple", "yellow", "black", "white"]
-
-    var winningHorse = null
-    var runnerUpHorse = null
+function getWinnerRunnerUp(currentState) {
+    var winningCamel = null
+    var runnerUpCamel = null
     var track = currentState.track
 
     for (var i = Object.keys(track).length - 1; i >= 0; i--) {
         for (var j = track[i]["camels"].length - 1; j >=0; j--) {
             var foundColorCamel = colorCamels.includes(track[i]["camels"][j])
             if (foundColorCamel) {
-                if (!winningHorse) {
-                    winningHorse = track[i]["camels"][j]
-                } else if (!runnerUpHorse) {
-                    runnerUpHorse = track[i]["camels"][j]
+                if (!winningCamel) {
+                    winningCamel = track[i]["camels"][j]
+                } else if (!runnerUpCamel) {
+                    runnerUpCamel = track[i]["camels"][j]
                     break;
                 }
             }
         }
     }
-    
+
+    return winningCamel, runnerUpCamel
+}
+
+function scoreLeg(currentState, winningCamel, runnerUpCamel) {
+    // var winningCamel, runnerUpCamel = getWinnerRunnerUp(currentState)
     // add the scoring
     for (var i = 0; i < currentState.numberPlayers; i++) {
         var playerPosition = currentState.players[i+1]["legs"][currentState.currentLeg]
         var score = playerPosition.score
         score += playerPosition.rolls
         for (let k in playerPosition.legBets) {
-            if (k === winningHorse) {
+            if (k === winningCamel) {
                 score += _.sum(playerPosition.legBets[k])
-            } else if (k === runnerUpHorse) {
+            } else if (k === runnerUpCamel) {
                 score += playerPosition.legBets[k].length
             } else {
                 score -= playerPosition.legBets[k].length
@@ -219,7 +275,12 @@ function newLeg(currentState) {
         }
         currentState.players[i+1]["legs"][currentState.currentLeg]["score"] = score
     }
+}
 
+function newLeg(currentState) {
+    currentState.remainingDice = ["red", "green", "blue", "purple", "yellow", "black", "white"]
+
+    var track = currentState.track
     // clear desert tiles from track
     for (var i = Object.keys(track).length - 1; i >= 0; i--) {
         track[i]["tiles"] = []
@@ -230,6 +291,8 @@ function newLeg(currentState) {
     for (var i = 0; i < currentState.numberPlayers; i++) {
         currentState.players[i+1]["legs"][currentState.currentLeg] =  _.cloneDeep(initialPlayerLegState)
     }
+
+    currentState.remainingLegBets =  _.cloneDeep(initialLegBets)
 }
 
 var initialPlayerLegState = {
@@ -253,7 +316,6 @@ var initialPlayerState = {
     "raceBets": {
         "long": [],
         "short": [],
-        "remaining": ["red", "purple", "blue", "green", "yellow"]
     },
 }
 
@@ -262,17 +324,21 @@ var initialTrackState = {
     "tiles": [],
 }
 
+var initialLegBets = {
+    "red": [2,2,3,5],
+    "purple": [2,2,3,5],
+    "blue": [2,2,3,5],
+    "green": [2,2,3,5],
+    "yellow": [2,2,3,5],
+}
+
 var initialGameState = {
     "numberPlayers": 3,
     "currentPlayer": "1",
     "currentLeg": 0,
-    "remainingLegBets": {
-        "red": [2,2,3,5],
-        "purple": [2,2,3,5],
-        "blue": [2,2,3,5],
-        "green": [2,2,3,5],
-        "yellow": [2,2,3,5],
-    },
+    "overallLongBets": [],
+    "overallShortBets": [],
+    "remainingLegBets": _.cloneDeep(initialLegBets),
     "remainingDice": ["red", "green", "blue", "purple", "yellow", "black", "white"],
     "players": {
         "1": _.cloneDeep(initialPlayerState),
@@ -325,6 +391,25 @@ export function getInitialGameState() {
     return _.cloneDeep(initialGameState)
 }
 
+function addDiceRolls(num) {
+    var toReturn = []
+    var array = [{
+        "type": "rollDice",
+        "player": "1",
+    },
+    {
+        "type": "rollDice",
+        "player": "2",
+    },
+    {
+        "type": "rollDice",
+        "player": "3",
+    }]
+    for (var i = 0; i < num; i++) {
+        toReturn = toReturn.concat(array)
+    }
+    return toReturn
+}
 var events = [
     {
         "type": "makeLegBet",
@@ -425,7 +510,23 @@ var events = [
         "type": "rollDice",
         "player": "3",
     },
-]
+    {
+        "type": "makeOverallRaceBet",
+        "player": "1",
+        "data": {
+            "kind": "long",
+            "color": "red"
+        }
+    },
+    {
+        "type": "rollDice",
+        "player": "2",
+    },
+    {
+        "type": "rollDice",
+        "player": "3",
+    }
+].concat(addDiceRolls(100))
 
 var gameState = initialGameState
 for (var i = 0; i < events.length; i++) {
