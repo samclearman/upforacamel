@@ -1,6 +1,7 @@
-import React from "react";
-import logo from "./logo.svg";
+import React, { useState } from "react";
+import { io } from 'socket.io-client';
 import "./App.css";
+
 
 function TrackTile(props) {
   const { camels } = props;
@@ -101,7 +102,31 @@ function Player(props) {
     </div>
   );
 }
+
+
+function makeSocket() {
+  const socket = io('http://localhost:3030');
+  socket.on("connect", () => {
+    console.log("connect", socket.id);
+    socket.emit("new_user", socket.id);
+    socket.on("game_state", (gameState) => {
+      console.log("got game state ", gameState);
+    });
+    socket.emit("event", {
+        "type": "makeLegBet",
+        "player": "1",
+        "data": {
+            "color": "yellow"
+        },
+    });
+  });  
+}
+
 function App() {
+  const [socket, setSocket] = useState(() => {
+    const initialState = makeSocket();
+    return initialState;
+  });
   const positions = [
     [2, 1],
     [3],
