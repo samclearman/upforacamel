@@ -1,3 +1,11 @@
+.container {
+    display: flex;
+    justify-content: center;
+}
+
+.container > div + div {
+    margin-left: 30px;
+}
 tr {
     display: flex;
 }
@@ -62,23 +70,23 @@ tr.camels {
     background-color: white;
 }
 
-#bet-1 {
+.bet-1 {
     border: 5px solid  red;
 }
 
-#bet-2 {
+.bet-2 {
     border: 5px solid  yellow;
 }
 
-#bet-3 {
+.bet-3 {
     border: 5px solid  blue;
 }
 
-#bet-4 {
+.bet-4 {
     border: 5px solid  green;
 }
 
-#bet-5 {
+.bet-5 {
     border: 5px solid  orange;
 }
 
@@ -148,4 +156,44 @@ tr.camels {
 .long-bet-8 {
     border: 5px solid sandybrown;
     color: white;
+}
+
+.player-1 {
+    background-color: lightblue;
+    border: 5px solid lightblue;
+}
+
+.player-2 {
+    background-color:  lightcoral;
+    border: 5px solid lightcoral;
+}
+
+.player-3 {
+    background-color: lightgoldenrodyellow;
+    border: 5px solid lightgoldenrodyellow;
+}
+
+.player-4 {
+    background-color: lightgreen;
+    border: 5px solid lightgreen;
+}
+
+.player-5 {
+    background-color: lightsalmon;
+    border: 5px solid lightsalmon;
+}
+
+.player-6 {
+    background-color: lightseagreen;
+    border: 5px solid lightseagreen;
+}
+
+.player-7 {
+    background-color: plum;
+    border: 5px solid plum;
+}
+
+.player-8 {
+    background-color: sandybrown;
+    border: 5px solid sandybrown;
 }

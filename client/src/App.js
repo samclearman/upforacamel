@@ -39,7 +39,7 @@ function Bet(props) {
   if (!bet) {
     return <td></td>;
   }
-  return <td id={`bet-${camel}`}>{bet}</td>;
+  return <td class={`bet-${camel}`}>{bet}</td>;
 }
 
 function Bets(props) {
@@ -85,63 +85,107 @@ function Dice(props) {
     </table>
   );
 }
-function App() {
+
+function Player(props) {
+  const { number, player } = props;
+  const renderedBets = player.bets.map((b) => (
+    <Bet camel={b.camel} bet={b.payout} />
+  ));
   return (
-    <>
-      <h3>Track</h3>
-      <Track
-        positions={[
-          [2, 1],
-          [3],
-          [4, 5],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [],
-          [-1],
-          [-2],
-        ]}
-        crowds={[
-          null,
-          null,
-          null,
-          { player: 1, direction: 1 },
-          null,
-          { player: 2, direction: -1 },
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ]}
-      />
+    <div class={`player-${number}`}>
+      <h3>{number}</h3>
 
-      <h3>Bets</h3>
-      <Bets available={[5, 3, 2, 2, 5]} />
+      <table class="player-bets">
+        <tr>{renderedBets}</tr>
+      </table>
+    </div>
+  );
+}
+function App() {
+  const players = [
+    { money: 1, bets: [{ camel: 2, payout: 5 }] },
+    { money: 1, bets: [] },
+    {
+      money: 0,
+      bets: [
+        { camel: 3, payout: 5 },
+        { camel: 4, payout: 3 },
+      ],
+    },
+    {
+      money: 0,
+      bets: [
+        { camel: 4, payout: 5 },
+        { camel: 3, payout: 3 },
+      ],
+    },
+  ];
+  return (
+    <div class="container">
+      <div class="game">
+        <h3>Track</h3>
+        <Track
+          positions={[
+            [2, 1],
+            [3],
+            [4, 5],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [-1],
+            [-2],
+          ]}
+          crowds={[
+            null,
+            null,
+            null,
+            { player: 1, direction: 1 },
+            null,
+            { player: 2, direction: -1 },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+          ]}
+        />
 
-      <h3>Long Bets</h3>
-      <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
+        <h3>Bets</h3>
+        <Bets available={[5, 3, 2, 2, 5]} />
 
-      <h3>Rolls</h3>
-      <Dice
-        rolled={[
-          { camel: 2, roll: 3 },
-          { camel: -1, roll: 1 },
-        ]}
-      />
-    </>
+        <h3>Long Bets</h3>
+        <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
+
+        <h3>Rolls</h3>
+        <Dice
+          rolled={[
+            { camel: 2, roll: 3 },
+            { camel: -1, roll: 1 },
+          ]}
+        />
+      </div>
+      <div class="Players">
+        <h2>Players</h2>
+        <div id="players">
+          {players.map((p, i) => (
+            <Player number={i + 1} player={p} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
