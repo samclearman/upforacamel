@@ -102,6 +102,52 @@ function Player(props) {
   );
 }
 function App() {
+  const positions = [
+    [2, 1],
+    [3],
+    [4, 5],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [-1],
+    [-2],
+  ];
+  const crowds = [
+    null,
+    null,
+    null,
+    { player: 1, direction: 1 },
+    null,
+    { player: 2, direction: -1 },
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+  ];
+
+  const availableBets = [5, 3, 2, 2, 5];
+  const longBets = {
+    toLose: [1, 4, 1],
+    toWin: [5, 3, 2, 2, 5],
+  };
+  const rolled = [
+    { camel: 2, roll: 3 },
+    { camel: -1, roll: 1 },
+  ];
   const players = [
     { money: 1, bets: [{ camel: 2, payout: 5 }] },
     { money: 1, bets: [] },
@@ -124,58 +170,16 @@ function App() {
     <div class="container">
       <div class="game">
         <h3>Track</h3>
-        <Track
-          positions={[
-            [2, 1],
-            [3],
-            [4, 5],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [],
-            [-1],
-            [-2],
-          ]}
-          crowds={[
-            null,
-            null,
-            null,
-            { player: 1, direction: 1 },
-            null,
-            { player: 2, direction: -1 },
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-          ]}
-        />
+        <Track positions={positions} crowds={crowds} />
 
         <h3>Bets</h3>
-        <Bets available={[5, 3, 2, 2, 5]} />
+        <Bets available={availableBets} />
 
         <h3>Long Bets</h3>
-        <LongBets toLose={[1, 4, 1]} toWin={[4, 3, 2, 2, 3]} />
+        <LongBets toLose={longBets.toLose} toWin={longBets.toWin} />
 
         <h3>Rolls</h3>
-        <Dice
-          rolled={[
-            { camel: 2, roll: 3 },
-            { camel: -1, roll: 1 },
-          ]}
-        />
+        <Dice rolled={rolled} />
       </div>
       <div class="Players">
         <h2>Players</h2>
