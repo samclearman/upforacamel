@@ -110,12 +110,13 @@ function Dice(props) {
 }
 
 function Player(props) {
-  const { number, player } = props;
+  const { number, player, active } = props;
   const renderedBets = player.bets.map((b) => (
     <Bet camel={b.camel} bet={b.payout} />
   ));
+  const style = active ? { border: "1px solid black" } : {};
   return (
-    <div class={`player-${number}`}>
+    <div class={`player-${number}`} style={style}>
       <h3>{player.name}</h3>
 
       <table class="player-bets">
@@ -258,6 +259,10 @@ function App() {
     });
   };
 
+  const isActive = (player) => {
+    return _gameState.currentPlayer === (player + 1).toString();
+  };
+
   const placeBet = (camel) => {
     emitEvent("makeLegBet", { color: camelToColor(camel) });
   };
@@ -302,7 +307,7 @@ function App() {
         <h2>Players</h2>
         <div id="players">
           {players.map((p, i) => (
-            <Player number={i + 1} player={p} />
+            <Player number={i + 1} player={p} active={isActive(i)} />
           ))}
         </div>
       </div>
