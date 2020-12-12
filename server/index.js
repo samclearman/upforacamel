@@ -26,9 +26,9 @@ io.on("connection", (socket) => {
     console.log('got event ', event)
     reduceEvent(gameState, event)
     console.log('new game state')
-    console.log(util.inspect(gameState, {showHidden: false, depth: null}))
+    // console.log(util.inspect(gameState, {showHidden: false, depth: null}))
 
-    socket.emit("game_state_update", event);
+    socket.emit("game_state", gameState);
   })
 
 });

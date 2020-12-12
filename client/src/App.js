@@ -45,19 +45,25 @@ function Track(props) {
 }
 
 function Bet(props) {
-  const { camel, bet } = props;
+  const { camel, bet, onPlace } = props;
   if (!bet) {
     return <td></td>;
   }
   const betStyle = {
     border: `5px solid ${camelToColor(camel)}`,
   };
-  return <td style={betStyle}>{bet}</td>;
+  return (
+    <td style={betStyle} onClick={onPlace}>
+      {bet}
+    </td>
+  );
 }
 
 function Bets(props) {
-  const { available } = props;
-  const renderedBets = available.map((a, i) => <Bet camel={i + 1} bet={a} />);
+  const { available, onPlace } = props;
+  const renderedBets = available.map((a, i) => (
+    <Bet camel={i + 1} bet={a} onPlace={() => onPlace(i + 1)} />
+  ));
   return (
     <table>
       <tr class="available-round-bets">{renderedBets}</tr>
@@ -92,12 +98,12 @@ function Die(props) {
 }
 
 function Dice(props) {
-  const { rolled } = props;
+  const { rolled, onRoll } = props;
   const renderedDice = rolled.map(({ camel, roll }) => (
     <Die camel={camel} roll={roll} />
   ));
   return (
-    <table class="rolled-dice">
+    <table class="rolled-dice" onClick={onRoll}>
       <tr>{renderedDice}</tr>
     </table>
   );
@@ -211,11 +217,12 @@ function getPlayers(gameState) {
   });
 }
 
-function makeSocket() {
+function makeSocket(setGameState) {
   const socket = io("http://localhost:3030");
   socket.on("connect", () => {
     console.log("connect", socket.id);
   });
+  socket.on("game_state", setGameState);
   return socket;
 }
 
@@ -224,22 +231,46 @@ function App() {
   const [crowds, setCrowds] = useState([]);
   const [availableBets, setAvailableBets] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [_gameState, _setGameState] = useState({});
 
-  const [socket, setSocket] = useState(() => {
-    return makeSocket();
-  });
-  socket.on("game_state", (gameState) => {
+  const setGameState = (gameState) => {
     console.log(gameState);
     setPositions(getPositions(gameState));
     setCrowds(getCrowds(gameState));
     setAvailableBets(getAvailableBets(gameState));
     setPlayers(getPlayers(gameState));
+    _setGameState(gameState);
+  };
+  const [socket, setSocket] = useState(() => {
+    return makeSocket(setGameState);
   });
+
+  socket.on("game_state", (gameState) => {});
+  const emitEvent = (type, data) => {
+    if (!_gameState.currentPlayer) {
+      console.log("no current player");
+      return;
+    }
+    socket.emit("event", {
+      type,
+      player: _gameState.currentPlayer,
+      data,
+    });
+  };
+
+  const placeBet = (camel) => {
+    emitEvent("makeLegBet", { color: camelToColor(camel) });
+  };
+
+  const roll = () => {
+    emitEvent("rollDice", {});
+  };
 
   const longBets = {
     toLose: [1, 4, 1],
     toWin: [5, 3, 2, 2, 5],
   };
+
   const rolled = [
     { camel: 2, roll: 3 },
     { camel: -1, roll: 1 },
@@ -259,13 +290,13 @@ function App() {
         <Track positions={positions} crowds={crowds} />
 
         <h3>Bets</h3>
-        <Bets available={availableBets} />
+        <Bets available={availableBets} onPlace={placeBet} />
 
         <h3>Long Bets</h3>
         <LongBets toLose={longBets.toLose} toWin={longBets.toWin} />
 
         <h3>Rolls</h3>
-        <Dice rolled={rolled} />
+        <Dice rolled={rolled} onRoll={roll} />
       </div>
       <div style={playersStyle}>
         <h2>Players</h2>
