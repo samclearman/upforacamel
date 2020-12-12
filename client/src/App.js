@@ -71,9 +71,26 @@ function Bets(props) {
   );
 }
 
+function playerNumberToColor(n) {
+  return [
+    "lightblue",
+    "lightcoral",
+    "lightgoldenrodyellow",
+    "lightgreen",
+    "lightsalmon",
+    "lightseagreen",
+    "plum",
+    "sandybrown",
+  ][n - 1];
+}
+
 function LongBet(props) {
   const { player } = props;
-  return <td class={`long-bet-${player}`}>{player}</td>;
+  const longBetStyle = {
+    border: `5px solid ${playerNumberToColor(player)}`,
+    color: "white",
+  };
+  return <td style={longBetStyle}>{player}</td>;
 }
 
 function LongBets(props) {
@@ -114,9 +131,15 @@ function Player(props) {
   const renderedBets = player.bets.map((b) => (
     <Bet camel={b.camel} bet={b.payout} />
   ));
-  const style = active ? { border: "1px solid black" } : {};
+  const playerStyle = {
+    backgroundColor: playerNumberToColor(number),
+    border: `5px solid ${playerNumberToColor(number)}`,
+  };
+  if (active) {
+    playerStyle.border = "1px solid black";
+  }
   return (
-    <div class={`player-${number}`} style={style}>
+    <div style={playerStyle}>
       <h3>{player.name}</h3>
 
       <table class="player-bets">
