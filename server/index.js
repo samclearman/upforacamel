@@ -1,10 +1,12 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { v4 as uuidv4 } from "uuid";
 import {
   getInitialGameState,
-  makeNewPlayerIfNeeded,
+  makeNewPlayer,
   startGame,
   reduceEvent,
+  redactGameState,
 } from "./reducer.js";
 
 const httpServer = createServer();
@@ -16,46 +18,49 @@ const io = new Server(httpServer, {
 });
 
 var gameState = getInitialGameState();
-var gameObservers = [];
+var gameObservers = {};
+var cookies = {};
 var registerGameObserver = (callback) => {
-  gameObservers.push(callback);
-}
+  const id = uuidv4();
+  gameObservers[id] = { callback };
+  return id;
+};
 var issueUpdate = () => {
-  for (const o of gameObservers) {
-    o(gameState);
+  for (const o of Object.values(gameObservers)) {
+    o.callback(redactGameState(gameState, o.player));
   }
-}
-var newPlayer = (cookie) => {
-  makeNewPlayerIfNeeded(gameState, cookie);
+};
+var registerCookie = (id, cookie) => {
+  if (cookie in cookies) {
+    const player = makeNewPlayer(gameState);
+    cookies[cookie] = { players: [player] };
+  }
+  gameObservers.id.cookie = cookie;
   issueUpdate();
-}
+};
 var start = () => {
   startGame();
   issueUpdate();
-}
+};
 var processEvent = (event) => {
   reduceEvent(gameState, event);
   issueUpdate();
-}
+};
 
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
 
-  registerGameObserver((newState) => {
-    socket.emit("game_state", { ...newState, longRaceBets: null, shortRaceBets: null});
-  });
-
-  socket.on("new_user", (socketId) => {
-    console.log("got new user with id ", socketId);
+  let id = registerGameObserver((newState) => {
+    socket.emit("game_state", newState);
   });
 
   socket.on("start_game", () => {
-    start()
+    start();
   });
 
   socket.on("register_cookie", ({ cookie }) => {
     console.log("register cookie ", cookie);
-    newPlayer(cookie);
+    makePlayer(cookie);
   });
 
   socket.on("event", (event) => {
@@ -63,15 +68,13 @@ io.on("connection", (socket) => {
     try {
       processEvent(event);
     } catch (e) {
-      console.log(e)
+      console.log(e);
     }
-    
+
     console.log("new game state");
-    // console.log(util.inspect(gameState, {showHidden: false, depth: null}))
   });
 
   socket.emit("game_state", gameState);
-
 });
 
 httpServer.listen(3030);
