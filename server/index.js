@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { getInitialGameState, reduceEvent } from "./reducer.js"
+import { getInitialGameState, makeNewPlayerIfNeeded, startGame, reduceEvent } from "./reducer.js"
 import util from "util"
 
 const httpServer = createServer();
@@ -19,6 +19,17 @@ io.on("connection", (socket) => {
   socket.on("new_user", (socketId) => {
     console.log("got new user with id ", socketId);
   });
+
+  socket.on("start_game", () => {
+    startGame()
+    socket.emit("game_state", gameState);
+  })
+
+  socket.on("register_cookie", (cookie) => {
+    console.log("register cookie ", cookie)
+    makeNewPlayerIfNeeded(gameState, cookie)
+    socket.emit("game_state", gameState);
+  })
 
   socket.emit("game_state", gameState);
 

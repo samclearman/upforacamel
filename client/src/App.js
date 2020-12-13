@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
+import { v4 as uuidv4 } from 'uuid';
 
 function TrackTile(props) {
   const { camels } = props;
@@ -246,9 +247,28 @@ function makeSocket(setGameState) {
   socket.on("connect", () => {
     console.log("connect", socket.id);
   });
+
   socket.on("game_state", setGameState);
+
+  cookie = getCookie()
+  socket.emit("register_cookie", {
+    "cookie": cookie
+  });
+
   return socket;
 }
+
+function getCookie() {
+  var cookie = localStorage.getItem('camelCookie')
+  if (cookie) {
+    return cookie
+  }
+
+  var cookie = uuidv4(); 
+  localStorage.setItem('camelCookie', cookie);
+  return cookie 
+}
+
 
 function App() {
   const [positions, setPositions] = useState([]);
@@ -270,6 +290,7 @@ function App() {
   });
 
   socket.on("game_state", (gameState) => {});
+
   const emitEvent = (type, data) => {
     if (!_gameState.currentPlayer) {
       console.log("no current player");

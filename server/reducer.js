@@ -1,12 +1,38 @@
 import _ from "lodash"
 import util from "util"
 
+export function makeNewPlayerIfNeeded(gameState, cookie) {
+    for (var i = 0; i < gameState.players.length; i++) {
+        if (gameState.players[i].cookie === cookie) {
+            console.log("this cookie is already associated with a player")
+            return False
+        }
+    }
+
+    if (gameState.started) {
+        console.log("cannot add players to a started game")
+        return False
+    }
+    gameState.numberPlayers += 1
+    playerNumber = gameState.numberPlayers.toString()
+    gameState.players[gameState.numberPlayers.toString()] = _.cloneDeep(initialPlayerState)
+    return True
+}
+
+export function startGame(gameState) {
+    gameState.started = True
+}
+
 export function reduceEvent(currentState, event) {
     validateEvent(currentState, event)
     
     var currentPlayer = event.player 
     var currentLeg = currentState.currentLeg
     switch(event.type) {
+        case "joinGame":
+            break;
+        case "startGame":
+            break;
         case "makeLegBet":
             var selectedColor = event.data.color
             if (currentState.remainingLegBets[selectedColor].length === 0) {
@@ -310,6 +336,8 @@ var initialPlayerLegState = {
 }
 
 var initialPlayerState = {
+    "cookie": "",
+    "screenName": "",
     "legs": {
         "0": _.cloneDeep(initialPlayerLegState)
     },
@@ -336,6 +364,7 @@ var initialGameState = {
     "numberPlayers": 3,
     "currentPlayer": "1",
     "currentLeg": 0,
+    "started": False, // If started, new players cannot be added
     "overallLongBets": [],
     "overallShortBets": [],
     "remainingLegBets": _.cloneDeep(initialLegBets),
@@ -410,124 +439,49 @@ function addDiceRolls(num) {
     }
     return toReturn
 }
-// var events = [
-//     {
-//         "type": "makeLegBet",
-//         "player": "1",
-//         "data": {
-//             "color": "yellow"
-//         },
-//     },
-//     {
-//         "type": "placeDesertTile",
-//         "player": "2",
-//         "data": {
-//             "desertTileIndex": 3,
-//             "desertTileSide": "oasis"
-//         }
-//     },
-//     {
-//         "type": "makeLegBet",
-//         "player": "3",
-//         "data": {
-//             "color": "yellow"
-//         }
-//     },
-//     {
-//         "type": "makeLegBet",
-//         "player": "1",
-//         "data": {
-//             "color": "yellow"
-//         }
-//     },
-//     {
-//         "type": "placeDesertTile",
-//         "player": "2",
-//         "data": {
-//             "desertTileIndex": 3,
-//             "desertTileSide": "mirage"
-//         }
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "3",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "1",
-//     },
-//     {
-//         "type": "placeDesertTile",
-//         "player": "2",
-//         "data": {
-//             "desertTileIndex": 10,
-//             "desertTileSide": "mirage"
-//         }
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "3",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "1",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "2",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "3",
-//     },
-//     {
-//         "type": "makeLegBet",
-//         "player": "1",
-//         "data": {
-//             "color": "blue"
-//         }
-//     },
-//     {
-//         "type": "makeLegBet",
-//         "player": "2",
-//         "data": {
-//             "color": "blue"
-//         }
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "3",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "1",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "2",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "3",
-//     },
-//     {
-//         "type": "makeOverallRaceBet",
-//         "player": "1",
-//         "data": {
-//             "kind": "long",
-//             "color": "red"
-//         }
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "2",
-//     },
-//     {
-//         "type": "rollDice",
-//         "player": "3",
-//     }
-// ]
+var exampleEvents = [
+    {
+        "type": "makeLegBet",
+        "player": "1",
+        "data": {
+            "color": "yellow"
+        },
+    },
+    {
+        "type": "placeDesertTile",
+        "player": "2",
+        "data": {
+            "desertTileIndex": 3,
+            "desertTileSide": "oasis"
+        }
+    },
+    {
+        "type": "placeDesertTile",
+        "player": "3",
+        "data": {
+            "desertTileIndex": 3,
+            "desertTileSide": "mirage"
+        }
+    },
+    {
+        "type": "rollDice",
+        "player": "1",
+    },
+    {
+        "type": "makeOverallRaceBet",
+        "player": "1",
+        "data": {
+            "kind": "long",
+            "color": "red"
+        }
+    },
+]
 
 var gameState = initialGameState
+
+// for (var i = 0; i < events.length; i++) {
+//     reduceEvent(gameState, events[i])
+//     console.log(util.inspect(gameState, {showHidden: false, depth: null}))
+// }
 
 
