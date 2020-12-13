@@ -63,7 +63,7 @@ function validateEvent(currentState, event) {
   switch (event.type) {
     case "makeLegBet":
       var selectedColor = event.data.color;
-      if (currentState.remainingLegBets[selectedColor].length === 0) {
+      if (currentState.legs[currentState.currentLegNum].remainingLegBets[selectedColor].length === 0) {
         throw new Error("Invalid move. Player has no more leg bets for color");
       }
       break;
@@ -80,6 +80,11 @@ function validateEvent(currentState, event) {
           "desertTile"
         ];
 
+      // current index cannot have a camel
+      if(track[desertTileIndex]["camels"].length > 0) {
+        throw new Error(`Invalid move. There are already camels ${track[desertTileIndex]["camels"]} on this tile`)
+      }
+      
       function checkDesertTileIndex(index) {
         if (
           index < 16 &&
@@ -135,7 +140,7 @@ function makeLegBet(currentState, event) {
   var currentPlayer = event.player;
   var currentLegNum = currentState.currentLegNum;
   var selectedColor = event.data.color;
-  var payoff = currentState.remainingLegBets[selectedColor].pop();
+  var payoff = currentState.legs[currentState.currentLegNum].remainingLegBets[selectedColor].pop();
   currentState.players[currentPlayer]["legs"][currentLegNum]["legBets"][
     selectedColor
   ].push(payoff);
@@ -603,68 +608,3 @@ export function getInitialGameState() {
   return _.cloneDeep(initialGameState);
 }
 
-function addDiceRolls(num) {
-  var toReturn = [];
-  var array = [
-    {
-      type: "rollDice",
-      player: "1",
-    },
-    {
-      type: "rollDice",
-      player: "2",
-    },
-    {
-      type: "rollDice",
-      player: "3",
-    },
-  ];
-  for (var i = 0; i < num; i++) {
-    toReturn = toReturn.concat(array);
-  }
-  return toReturn;
-}
-
-var exampleEvents = [
-  {
-    type: "makeLegBet",
-    player: "1",
-    data: {
-      color: "yellow",
-    },
-  },
-  {
-    type: "placeDesertTile",
-    player: "2",
-    data: {
-      desertTileIndex: 3,
-      desertTileSide: "oasis",
-    },
-  },
-  {
-    type: "placeDesertTile",
-    player: "3",
-    data: {
-      desertTileIndex: 3,
-      desertTileSide: "mirage",
-    },
-  },
-  {
-    type: "rollDice",
-    player: "1",
-  },
-  {
-    type: "makeRaceBet",
-    player: "1",
-    data: {
-      kind: "long",
-      color: "red",
-    },
-  },
-];
-
-// var gameState = initialGameState;
-// for (var i = 0; i < events.length; i++) {
-//     reduceEvent(gameState, events[i])
-//     console.log(util.inspect(gameState, {showHidden: false, depth: null}))
-// }
