@@ -1,5 +1,5 @@
 import _ from "lodash";
-import util from "util"
+import util from "util";
 
 export function makeNewPlayerIfNeeded(gameState, cookie) {
   for (var i = 0; i < Object.keys(gameState.players).length; i++) {
@@ -29,7 +29,7 @@ export function reduceEvent(currentState, event) {
 
   switch (event.type) {
     case "makeLegBet":
-      makeLegBet(currentState, event)
+      makeLegBet(currentState, event);
       break;
     case "rollDice":
       rollDice(currentState, event);
@@ -73,7 +73,7 @@ function validateEvent(currentState, event) {
     case "placeDesertTile":
       var desertTileIndex = event.data.desertTileIndex;
       if (desertTileIndex === 0) {
-          throw new Error("Invalid move. Cannot place on first tile");
+        throw new Error("Invalid move. Cannot place on first tile");
       }
       var existingDesertTile =
         currentState["players"][currentPlayer]["legs"][currentLeg][
@@ -82,42 +82,48 @@ function validateEvent(currentState, event) {
 
       function checkDesertTileIndex(index) {
         if (
-            index < 16 &&
-            index > 0 &&
-            track[index]["tiles"].length > 0 &&
-            Math.abs(existingDesertTile) !== index
-          ) {
-            throw new Error(
-              `Invalid move. Another player's tile is at index ${index}`
-            );
-          }
+          index < 16 &&
+          index > 0 &&
+          track[index]["tiles"].length > 0 &&
+          Math.abs(existingDesertTile) !== index
+        ) {
+          throw new Error(
+            `Invalid move. Another player's tile is at index ${index}`
+          );
+        }
       }
       // there are no other users' tiles on +/- 1 of this spot
-      checkDesertTileIndex(desertTileIndex)
-      checkDesertTileIndex(desertTileIndex + 1)
-      checkDesertTileIndex(desertTileIndex - 1)
+      checkDesertTileIndex(desertTileIndex);
+      checkDesertTileIndex(desertTileIndex + 1);
+      checkDesertTileIndex(desertTileIndex - 1);
 
       // if user is already already there, they must flip the tile side
       if (Math.abs(existingDesertTile) === desertTileIndex) {
         if (existingDesertTile > 0 && event.data.desertTileSide === "oasis") {
-            throw new Error("Invalid move. Player already has an oasis desert tile here");
-          } else if (
-            existingDesertTile < 0 &&
-            event.data.desertTileSide === "mirage"
-          ) {
-            throw new Error("Invalid move. Player already has an mirage desert tile here");
-          }
+          throw new Error(
+            "Invalid move. Player already has an oasis desert tile here"
+          );
+        } else if (
+          existingDesertTile < 0 &&
+          event.data.desertTileSide === "mirage"
+        ) {
+          throw new Error(
+            "Invalid move. Player already has an mirage desert tile here"
+          );
+        }
       }
       break;
     case "makeRaceBet":
       var color = event.data.color;
 
-      var raceBets = getPlayerExistingRaceBets(currentPlayer)
+      var raceBets = getPlayerExistingRaceBets(currentPlayer);
       if (
         raceBets["longRaceBets"].includes(color) ||
         raceBets["shortRaceBets"].includes(color)
       ) {
-        throw new Error("Invalid move. Player has already made a race bet with this color");
+        throw new Error(
+          "Invalid move. Player has already made a race bet with this color"
+        );
       }
       break;
     case "pickPartner":
@@ -126,31 +132,33 @@ function validateEvent(currentState, event) {
 }
 
 function makeLegBet(currentState, event) {
-    var currentPlayer = event.player;
-    var currentLeg = currentState.currentLeg;
-    var selectedColor = event.data.color;
-    var payoff = currentState.remainingLegBets[selectedColor].pop();
-    currentState.players[currentPlayer]["legs"][currentLeg]["legBets"][selectedColor].push(payoff);
+  var currentPlayer = event.player;
+  var currentLeg = currentState.currentLeg;
+  var selectedColor = event.data.color;
+  var payoff = currentState.remainingLegBets[selectedColor].pop();
+  currentState.players[currentPlayer]["legs"][currentLeg]["legBets"][
+    selectedColor
+  ].push(payoff);
 }
 
 function getPlayerExistingRaceBets(currentState, player) {
-    var longRaceBets = [];
-    for (o in currentState["longRaceBets"]) {
-        if (o.player == player) {
-            longRaceBets.push(o.color)
-        }
-    }
-    var shortRaceBets = [];
-    for (o in currentState["shortRaceBets"]) {
-        if (o.player == player) {
-            shortRaceBets.push(o.color)
-        }
-    }
-    return {
-        "longRaceBets": longRaceBets,
-        "shortRaceBets": shortRaceBets,
+  var longRaceBets = [];
+  for (o in currentState["longRaceBets"]) {
+    if (o.player == player) {
+      longRaceBets.push(o.color);
     }
   }
+  var shortRaceBets = [];
+  for (o in currentState["shortRaceBets"]) {
+    if (o.player == player) {
+      shortRaceBets.push(o.color);
+    }
+  }
+  return {
+    longRaceBets: longRaceBets,
+    shortRaceBets: shortRaceBets,
+  };
+}
 
 function makeRaceBet(currentState, event) {
   var kind = event.data.kind;
@@ -159,8 +167,8 @@ function makeRaceBet(currentState, event) {
 
   var category = kind === "long" ? "longRaceBets" : "shortRaceBets";
   currentState[category].push({
-      "player": currentPlayer,
-      "color": color
+    player: currentPlayer,
+    color: color,
   });
 }
 
@@ -194,95 +202,113 @@ function isColorCamel(color) {
 }
 
 function getCamelPositionAndStack(track, color) {
-    console.log(`getCamelPositionAndStack: track ${track}; color ${color}`)
-    console.log(util.inspect(track, {showHidden: false, depth: null}))
-    for (var i = 0; i < Object.keys(track).length; i++) {
-        if (track[i]["camels"].includes(color)) {
-          var camelIndex = track[i]["camels"].indexOf(color);
-          var camelsToMove = track[i]["camels"].slice(camelIndex);
-          return [i, camelsToMove]
-        }
+  console.log(`getCamelPositionAndStack: track ${track}; color ${color}`);
+  console.log(util.inspect(track, { showHidden: false, depth: null }));
+  for (var i = 0; i < Object.keys(track).length; i++) {
+    if (track[i]["camels"].includes(color)) {
+      var camelIndex = track[i]["camels"].indexOf(color);
+      var camelsToMove = track[i]["camels"].slice(camelIndex);
+      return [i, camelsToMove];
     }
-    return [-1, null]
   }
+  return [-1, null];
+}
 
 function pickBlackOrWhiteCamel(track, rolledDiceColor) {
-    var [blackPosition, blackCamelsToMove] = getCamelPositionAndStack(track, "black")
-    var [whitePosition, whiteCamelsToMove] = getCamelPositionAndStack(track, "white")
+  var [blackPosition, blackCamelsToMove] = getCamelPositionAndStack(
+    track,
+    "black"
+  );
+  var [whitePosition, whiteCamelsToMove] = getCamelPositionAndStack(
+    track,
+    "white"
+  );
 
-    var camelColor = null
-    if (blackCamelsToMove.length === 1) {
-        if (whiteCamelsToMove === 1) {
-            // if neither camel is carrying anyone, move whichever was rolled
-            camelColor = rolledDiceColor
-        } else if (whiteCamelsToMove[1] === "black") { 
-            // if white camel is carrying black camel, then use black
-            camelColor = "black"
-        } else {
-            // if white camel is not carrying black camel, then use white
-            camelColor = "white"
-        }
+  var camelColor = null;
+  if (blackCamelsToMove.length === 1) {
+    if (whiteCamelsToMove === 1) {
+      // if neither camel is carrying anyone, move whichever was rolled
+      camelColor = rolledDiceColor;
+    } else if (whiteCamelsToMove[1] === "black") {
+      // if white camel is carrying black camel, then use black
+      camelColor = "black";
     } else {
-        if (whiteCamelsToMove === 1) {
-            // if black camel is carrying white, move white; else black
-            if (blackCamelsToMove[1] === "white") { 
-                camelColor = "white"
-            } else {
-                camelColor = "black"
-            }
-        } else { 
-            // both camels are carrying other camels
-            if (blackCamelsToMove[1] === "white") { 
-                camelColor = "white"
-            } else if (whiteCamelsToMove[1] === "white") {
-                camelColor = "black"
-            } else {
-                camelColor = rolledDiceColor
-            }
-        }
+      // if white camel is not carrying black camel, then use white
+      camelColor = "white";
     }
-    return camelColor
+  } else {
+    if (whiteCamelsToMove === 1) {
+      // if black camel is carrying white, move white; else black
+      if (blackCamelsToMove[1] === "white") {
+        camelColor = "white";
+      } else {
+        camelColor = "black";
+      }
+    } else {
+      // both camels are carrying other camels
+      if (blackCamelsToMove[1] === "white") {
+        camelColor = "white";
+      } else if (whiteCamelsToMove[1] === "white") {
+        camelColor = "black";
+      } else {
+        camelColor = rolledDiceColor;
+      }
+    }
+  }
+  return camelColor;
 }
 
 function moveCamel(track, color, position, newPosition, placeUnder) {
-    var camelIndex = track[position]["camels"].indexOf(color);
-    var camelsToMove = track[position]["camels"].slice(camelIndex);
-    track[position]["camels"] = track[position]["camels"].slice(0, camelIndex);
+  var camelIndex = track[position]["camels"].indexOf(color);
+  var camelsToMove = track[position]["camels"].slice(camelIndex);
+  track[position]["camels"] = track[position]["camels"].slice(0, camelIndex);
 
-    if (newPosition) {
-        if (!placeUnder) {
-        track[newPosition]["camels"] = track[newPosition]["camels"].concat(camelsToMove);
-        } else {
-        track[newPosition]["camels"] = camelsToMove.concat(track[newPosition]["camels"]);
-        }
+  if (newPosition) {
+    if (!placeUnder) {
+      track[newPosition]["camels"] = track[newPosition]["camels"].concat(
+        camelsToMove
+      );
+    } else {
+      track[newPosition]["camels"] = camelsToMove.concat(
+        track[newPosition]["camels"]
+      );
     }
+  }
 }
-
 
 function rollDice(currentState, event) {
   var currentPlayer = event.player;
   var currentLeg = currentState.currentLeg;
   var track = currentState.track;
-  var currentRound = currentState.rounds[currentLeg]
+  var currentRound = currentState.rounds[currentLeg];
 
-  var rolledDiceColor = _.sample(currentRound.remainingDice)
-  _.remove(currentRound.remainingDice, function(item) { item === rolledDiceColor })
+  var rolledDiceColor = _.sample(currentRound.remainingDice);
+  _.remove(currentRound.remainingDice, function (item) {
+    item === rolledDiceColor;
+  });
   if (rolledDiceColor === "bw") {
     rolledDiceColor = _.sample(bwCamels);
   }
   var rolledDiceNumber = _.sample([1, 2, 3]);
-  console.log(`color ${rolledDiceColor}; number ${rolledDiceNumber}`)
-  currentRound.rolledDice.push({ "color": rolledDiceColor, "number": rolledDiceNumber, "player": currentPlayer})
+  console.log(`color ${rolledDiceColor}; number ${rolledDiceNumber}`);
+  currentRound.rolledDice.push({
+    color: rolledDiceColor,
+    number: rolledDiceNumber,
+    player: currentPlayer,
+  });
 
   currentState.players[currentPlayer]["legs"][currentLeg]["rolls"] += 1;
 
-  var camelColor = bwCamels.includes(rolledDiceColor) ? pickBlackOrWhiteCamel(track, rolledDiceColor) : rolledDiceColor
+  var camelColor = bwCamels.includes(rolledDiceColor)
+    ? pickBlackOrWhiteCamel(track, rolledDiceColor)
+    : rolledDiceColor;
 
-  var [camelPosition, camelsToMove] = getCamelPositionAndStack(track, camelColor)
+  var [camelPosition, camelsToMove] = getCamelPositionAndStack(
+    track,
+    camelColor
+  );
   if (camelPosition < 0) {
-    throw new Error(
-      `Something went wrong! ${camelColor} camel was not found`
-    );
+    throw new Error(`Something went wrong! ${camelColor} camel was not found`);
   }
 
   var movement = isColorCamel(camelColor)
@@ -291,10 +317,9 @@ function rollDice(currentState, event) {
 
   var newCamelPosition = camelPosition + movement;
   if (newCamelPosition > 15) {
-    moveCamel(track, camelColor, camelPosition, null, null)
+    moveCamel(track, camelColor, camelPosition, null, null);
     scoreGame(currentState, camelsToMove);
   }
-
 
   var placeUnder = false;
   if (track[newCamelPosition]["tiles"].length > 0) {
@@ -308,11 +333,11 @@ function rollDice(currentState, event) {
   }
 
   if (newCamelPosition > 15) {
-    moveCamel(track, camelColor, camelPosition, null, null)
+    moveCamel(track, camelColor, camelPosition, null, null);
     scoreGame(currentState, camelsToMove);
   }
 
-  moveCamel(track, camelColor, camelPosition, newCamelPosition, placeUnder)
+  moveCamel(track, camelColor, camelPosition, newCamelPosition, placeUnder);
 
   // need to see if they land on a desert tile which can
   // 1) impact position 2) impact coins
@@ -326,34 +351,40 @@ function rollDice(currentState, event) {
 }
 
 function getWinnerRunnerUpLoser(currentState, camelsToMove) {
-    var winnerCamel = null;
-    var runnerUpCamel = null;
-    var loserCamel = null;
-    while (camelsToMove.length > 0) {
-        var camel = camelsToMove.pop();
-        if (colorCamels.includes(camel)) {
-            if (!winnerCamel) {
-                winnerCamel = camel
-            } else if (!runnerUpCamel) {
-                runnerUpCamel = camel
-            } else {
-                loserCamel = camel
-            }
-        }
+  var winnerCamel = null;
+  var runnerUpCamel = null;
+  var loserCamel = null;
+  while (camelsToMove.length > 0) {
+    var camel = camelsToMove.pop();
+    if (colorCamels.includes(camel)) {
+      if (!winnerCamel) {
+        winnerCamel = camel;
+      } else if (!runnerUpCamel) {
+        runnerUpCamel = camel;
+      } else {
+        loserCamel = camel;
+      }
     }
-    if (!runnerUpCamel) {
-        var dummy = null
-        [runnerUpCamel, dummy] = getWinnerRunnerUp(currentState);
-    }
-    if (!loserCamel) {
-        loserCamel = getLoserCamel(currentState);
-    }
-    return [winnerCamel, runnerUpCamel, loserCamel]
+  }
+  if (!runnerUpCamel) {
+    var dummy = (null[(runnerUpCamel, dummy)] = getWinnerRunnerUp(
+      currentState
+    ));
+  }
+  if (!loserCamel) {
+    loserCamel = getLoserCamel(currentState);
+  }
+  return [winnerCamel, runnerUpCamel, loserCamel];
 }
 
 function scoreGame(currentState, camelsToMove) {
-  const [winnerCamel, runnerUpCamel, loserCamel] = getWinnerRunnerUpLoser(currentState, camelsToMove)
-  console.log(`Winner camel is ${winnerCamel}. Runner up is ${runnerUpCamel}. Loser is ${loserCamel}`)
+  const [winnerCamel, runnerUpCamel, loserCamel] = getWinnerRunnerUpLoser(
+    currentState,
+    camelsToMove
+  );
+  console.log(
+    `Winner camel is ${winnerCamel}. Runner up is ${runnerUpCamel}. Loser is ${loserCamel}`
+  );
   scoreLeg(currentState, winnerCamel, runnerUpCamel);
 
   // sum up leg scores
@@ -368,22 +399,22 @@ function scoreGame(currentState, camelsToMove) {
     scores[i] = playerLegScore;
   }
 
-  var payoffs = [8,5,3,2] // everyone gets at least 1
+  var payoffs = [8, 5, 3, 2]; // everyone gets at least 1
   for (o in gameState.longRaceBets) {
-      if (o.color == winnerCamel) {
-          scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1
-      } else {
-        scores[o.player] -= 1
-      }
+    if (o.color == winnerCamel) {
+      scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1;
+    } else {
+      scores[o.player] -= 1;
+    }
   }
 
-  payoffs = [8,5,3,2] // everyone gets at least 1
+  payoffs = [8, 5, 3, 2]; // everyone gets at least 1
   for (o in gameState.shortRaceBets) {
-      if (o.color == loserCamel) {
-          scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1
-      } else {
-        scores[o.player] -= 1
-      }
+    if (o.color == loserCamel) {
+      scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1;
+    } else {
+      scores[o.player] -= 1;
+    }
   }
 
   throw new Error(`Game over with scores ${scores}`);
@@ -429,16 +460,16 @@ function getWinnerRunnerUp(currentState) {
 }
 
 function getLoserCamel(currentState) {
-    var track = currentState.track;
+  var track = currentState.track;
 
-    for (var i = 0; i < Object.keys(track).length ; i++) {
-      for (var j = 0; j < track[i]["camels"].length; j++) {
-        if (colorCamels.includes(track[i]["camels"][j])) {
-            return track[i]["camels"][j]
-        }
+  for (var i = 0; i < Object.keys(track).length; i++) {
+    for (var j = 0; j < track[i]["camels"].length; j++) {
+      if (colorCamels.includes(track[i]["camels"][j])) {
+        return track[i]["camels"][j];
       }
     }
   }
+}
 
 function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
   // add the scoring
@@ -527,8 +558,8 @@ var initialLegBets = {
 var initialRoundState = {
   remainingLegBets: _.cloneDeep(initialLegBets),
   remainingDice: ["red", "green", "blue", "purple", "yellow", "bw"],
-  rolledDice: []
-}
+  rolledDice: [],
+};
 
 var initialGameState = {
   numberPlayers: 0,
@@ -538,7 +569,7 @@ var initialGameState = {
   longRaceBets: [],
   shortRaceBets: [],
   rounds: {
-    0: _.cloneDeep(initialRoundState)
+    0: _.cloneDeep(initialRoundState),
   },
   players: {},
   track: {
