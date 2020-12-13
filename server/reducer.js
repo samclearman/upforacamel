@@ -319,7 +319,7 @@ function rollDice(currentState, event) {
   // track[newCamelPosition] = rolledDiceColor // need to add other camels too
   if (currentState.rounds[currentState.currentLeg].remainingDice.length === 1) {
     console.log("NEW LEG!!!");
-    var winnerCamel, runnerUpCamel = getWinnerRunnerUp(currentState);
+    var [winnerCamel, runnerUpCamel] = getWinnerRunnerUp(currentState);
     scoreLeg(currentState, winnerCamel, runnerUpCamel);
     newLeg(currentState);
   }
@@ -343,7 +343,7 @@ function getWinnerRunnerUpLoser(currentState, camelsToMove) {
     }
     if (!runnerUpCamel) {
         var dummy = null
-        runnerUpCamel, dummy = getWinnerRunnerUp(currentState);
+        [runnerUpCamel, dummy] = getWinnerRunnerUp(currentState);
     }
     if (!loserCamel) {
         loserCamel = getLoserCamel(currentState);
@@ -368,7 +368,7 @@ function scoreGame(currentState, camelsToMove) {
     scores[i] = playerLegScore;
   }
 
-  payoffs = [8,5,3,2] // everyone gets at least 1
+  var payoffs = [8,5,3,2] // everyone gets at least 1
   for (o in gameState.longRaceBets) {
       if (o.color == winnerCamel) {
           scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1
@@ -425,7 +425,7 @@ function getWinnerRunnerUp(currentState) {
     }
   }
 
-  return winnerCamel, runnerUpCamel;
+  return [winnerCamel, runnerUpCamel];
 }
 
 function getLoserCamel(currentState) {
