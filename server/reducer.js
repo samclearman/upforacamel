@@ -52,7 +52,7 @@ export function reduceEvent(currentState, event) {
 
 function validateEvent(currentState, event) {
   var track = currentState.track;
-  var currentLeg = currentState.currentLeg;
+  var currentLegNum = currentState.currentLegNum;
   var currentPlayer = event.player;
 
   if (currentPlayer !== currentState.currentPlayer) {
@@ -76,7 +76,7 @@ function validateEvent(currentState, event) {
         throw new Error("Invalid move. Cannot place on first tile");
       }
       var existingDesertTile =
-        currentState["players"][currentPlayer]["legs"][currentLeg][
+        currentState["players"][currentPlayer]["legs"][currentLegNum][
           "desertTile"
         ];
 
@@ -133,10 +133,10 @@ function validateEvent(currentState, event) {
 
 function makeLegBet(currentState, event) {
   var currentPlayer = event.player;
-  var currentLeg = currentState.currentLeg;
+  var currentLegNum = currentState.currentLegNum;
   var selectedColor = event.data.color;
   var payoff = currentState.remainingLegBets[selectedColor].pop();
-  currentState.players[currentPlayer]["legs"][currentLeg]["legBets"][
+  currentState.players[currentPlayer]["legs"][currentLegNum]["legBets"][
     selectedColor
   ].push(payoff);
 }
@@ -174,7 +174,7 @@ function makeRaceBet(currentState, event) {
 
 function placeDesertTile(currentState, event) {
   var track = currentState.track;
-  var currentLeg = currentState.currentLeg;
+  var currentLegNum = currentState.currentLegNum;
   var currentPlayer = event.player;
 
   var desertTileIndex = event.data.desertTileIndex;
@@ -182,14 +182,14 @@ function placeDesertTile(currentState, event) {
 
   // remove existing desert tile
   var existingDesertTile =
-    currentState["players"][currentPlayer]["legs"][currentLeg]["desertTile"];
+    currentState["players"][currentPlayer]["legs"][currentLegNum]["desertTile"];
   if (existingDesertTile !== -100) {
     track[Math.abs(existingDesertTile)]["tiles"] = [];
   }
 
   // add new desert tile
   track[desertTileIndex]["tiles"] = [isOasis ? "+" : "-"];
-  currentState["players"][currentPlayer]["legs"][currentLeg][
+  currentState["players"][currentPlayer]["legs"][currentLegNum][
     "desertTile"
   ] = desertTileIndex;
 }
@@ -202,8 +202,6 @@ function isColorCamel(color) {
 }
 
 function getCamelPositionAndStack(track, color) {
-  console.log(`getCamelPositionAndStack: track ${track}; color ${color}`);
-  console.log(util.inspect(track, { showHidden: false, depth: null }));
   for (var i = 0; i < Object.keys(track).length; i++) {
     if (track[i]["camels"].includes(color)) {
       var camelIndex = track[i]["camels"].indexOf(color);
@@ -278,26 +276,27 @@ function moveCamel(track, color, position, newPosition, placeUnder) {
 
 function rollDice(currentState, event) {
   var currentPlayer = event.player;
-  var currentLeg = currentState.currentLeg;
+  var currentLegNum = currentState.currentLegNum;
   var track = currentState.track;
-  var currentRound = currentState.rounds[currentLeg];
+  var currentLeg = currentState.legs[currentLegNum];
 
-  var rolledDiceColor = _.sample(currentRound.remainingDice);
-  _.remove(currentRound.remainingDice, function (item) {
-    item === rolledDiceColor;
+  var rolledDiceColor = _.sample(currentLeg.remainingDice);
+  currentLeg.remainingDice = _.filter(currentLeg.remainingDice, function(o) { 
+    return o !== rolledDiceColor 
   });
+
   if (rolledDiceColor === "bw") {
     rolledDiceColor = _.sample(bwCamels);
   }
   var rolledDiceNumber = _.sample([1, 2, 3]);
   console.log(`color ${rolledDiceColor}; number ${rolledDiceNumber}`);
-  currentRound.rolledDice.push({
+  currentLeg.rolledDice.push({
     color: rolledDiceColor,
     number: rolledDiceNumber,
     player: currentPlayer,
   });
 
-  currentState.players[currentPlayer]["legs"][currentLeg]["rolls"] += 1;
+  currentState.players[currentPlayer]["legs"][currentLegNum]["rolls"] += 1;
 
   var camelColor = bwCamels.includes(rolledDiceColor)
     ? pickBlackOrWhiteCamel(track, rolledDiceColor)
@@ -339,11 +338,7 @@ function rollDice(currentState, event) {
 
   moveCamel(track, camelColor, camelPosition, newCamelPosition, placeUnder);
 
-  // need to see if they land on a desert tile which can
-  // 1) impact position 2) impact coins
-  // track[newCamelPosition] = rolledDiceColor // need to add other camels too
-  if (currentState.rounds[currentState.currentLeg].remainingDice.length === 1) {
-    console.log("NEW LEG!!!");
+  if (currentState.legs[currentState.currentLegNum].remainingDice.length === 1) {
     var [winnerCamel, runnerUpCamel] = getWinnerRunnerUp(currentState);
     scoreLeg(currentState, winnerCamel, runnerUpCamel);
     newLeg(currentState);
@@ -393,7 +388,7 @@ function scoreGame(currentState, camelsToMove) {
     var playerLegScore = 0;
     var currentPlayer = currentState["players"][i + 1];
     console.log("scoring, currentPlayerState", currentPlayer);
-    for (var j = 0; j <= currentState.currentLeg; j++) {
+    for (var j = 0; j <= currentState.currentLegNum; j++) {
       playerLegScore += currentPlayer["legs"][j]["score"];
     }
     scores[i] = playerLegScore;
@@ -424,9 +419,9 @@ function updatePlayerScoreDesertTile(currentState, camelPosition) {
   var foundTileOwner = false;
   for (var i = 0; i < currentState.numberPlayers; i++) {
     var desertTile =
-      currentState.players[i + 1]["legs"][currentState.currentLeg].desertTile;
+      currentState.players[i + 1]["legs"][currentState.currentLegNum].desertTile;
     if (Math.abs(desertTile) == camelPosition) {
-      currentState.players[i + 1]["legs"][currentState.currentLeg][
+      currentState.players[i + 1]["legs"][currentState.currentLegNum][
         "score"
       ] += 1;
       foundTileOwner = true;
@@ -475,7 +470,7 @@ function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
   // add the scoring
   for (var i = 0; i < currentState.numberPlayers; i++) {
     var playerPosition =
-      currentState.players[i + 1]["legs"][currentState.currentLeg];
+      currentState.players[i + 1]["legs"][currentState.currentLegNum];
     var score = playerPosition.score;
     score += playerPosition.rolls;
     for (let k in playerPosition.legBets) {
@@ -487,21 +482,15 @@ function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
         score -= playerPosition.legBets[k].length;
       }
     }
-    currentState.players[i + 1]["legs"][currentState.currentLeg][
+    currentState.players[i + 1]["legs"][currentState.currentLegNum][
       "score"
     ] = Math.max(score, 0); // can't go negative
   }
 }
 
 function newLeg(currentState) {
-  currentState.remainingDice = [
-    "red",
-    "green",
-    "blue",
-    "purple",
-    "yellow",
-    "bw",
-  ];
+  currentState.currentLegNum += 1;
+  currentState.legs[currentState.currentLegNum] = _.cloneDeep(initialLegState);
 
   var track = currentState.track;
   // clear desert tiles from track
@@ -509,15 +498,11 @@ function newLeg(currentState) {
     track[i]["tiles"] = [];
   }
 
-  currentState.currentLeg += 1;
-
   for (var i = 0; i < currentState.numberPlayers; i++) {
-    currentState.players[i + 1]["legs"][currentState.currentLeg] = _.cloneDeep(
+    currentState.players[i + 1]["legs"][currentState.currentLegNum] = _.cloneDeep(
       initialPlayerLegState
     );
   }
-
-  currentState.remainingLegBets = _.cloneDeep(initialLegBets);
 }
 
 var initialPlayerLegState = {
@@ -555,7 +540,7 @@ var initialLegBets = {
   yellow: [2, 2, 3, 5],
 };
 
-var initialRoundState = {
+var initialLegState = {
   remainingLegBets: _.cloneDeep(initialLegBets),
   remainingDice: ["red", "green", "blue", "purple", "yellow", "bw"],
   rolledDice: [],
@@ -564,12 +549,12 @@ var initialRoundState = {
 var initialGameState = {
   numberPlayers: 0,
   currentPlayer: "1",
-  currentLeg: 0,
+  currentLegNum: 0,
   started: false, // If started, new players cannot be added
   longRaceBets: [],
   shortRaceBets: [],
-  rounds: {
-    0: _.cloneDeep(initialRoundState),
+  legs: {
+    0: _.cloneDeep(initialLegState),
   },
   players: {},
   track: {
