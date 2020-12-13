@@ -88,30 +88,58 @@ function playerNumberToColor(n) {
 }
 
 function LongBet(props) {
-  const { player } = props;
+  const { camel, player } = props;
+  const color = camel ? camelToColor(camel) : playerNumberToColor(player);
   const longBetStyle = {
     border: `1px solid black`,
-    backgroundColor: playerNumberToColor(player),
-    color: playerNumberToColor(player),
+    backgroundColor: color,
+    color: color,
   };
-  return <td style={longBetStyle}>{player}</td>;
+  return <td style={longBetStyle}>{camel || player}</td>;
 }
 
 function LongBetButton(props) {
   const style = {
     border: "none",
   };
-  return <td style={style}>{props.children}</td>;
+  let [showingModal, setShowingModal] = useState(false);
+  let [modalLeft, setModalLeft] = useState(0);
+  let [modalTop, setModalTop] = useState(0);
+  const showLongBetModal = (e) => {
+    console.log(e);
+    setModalTop(e.clientY);
+    setModalLeft(e.clientX);
+    setShowingModal(true);
+  };
+  const renderedAvailableLongBets = props.available.map((c) => (
+    <LongBet camel={c} />
+  ));
+  return (
+    <td style={style} onClick={showLongBetModal}>
+      {showingModal && (
+        <Modal
+          left={modalLeft}
+          top={modalTop}
+          close={() => setShowingModal(false)}
+        >
+          <table>
+            <tr>{renderedAvailableLongBets}</tr>
+          </table>
+        </Modal>
+      )}
+      {props.children}
+    </td>
+  );
 }
 
 function LongBets(props) {
-  const { toWin, toLose } = props;
+  const { toWin, toLose, available } = props;
   const renderedToWin = toWin
     .map((p) => <LongBet player={p} />)
-    .concat(<LongBetButton>{"→"}</LongBetButton>);
+    .concat(<LongBetButton available={available}>{"→"}</LongBetButton>);
   const renderedToLose = toLose
     .map((p) => <LongBet player={p} />)
-    .concat(<LongBetButton>{"←"}</LongBetButton>);
+    .concat(<LongBetButton available={available}>{"←"}</LongBetButton>);
   return (
     <table class="placed-bets">
       <tr class="placed-bets-to-win">{renderedToWin}</tr>
@@ -124,6 +152,7 @@ function Die(props) {
   const { camel, roll } = props;
   const dieStyle = {
     border: `1px solid black`,
+    color: camelToTextColor(parseInt(camel)),
     backgroundColor: camelToColor(parseInt(camel)),
   };
 
@@ -139,6 +168,31 @@ function Dice(props) {
     <table class="rolled-dice" onClick={onRoll}>
       <tr>{renderedDice}</tr>
     </table>
+  );
+}
+
+function Modal(props) {
+  const { close } = props;
+  const outerStyle = {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: "100%",
+    height: "100%",
+  };
+  const innerStyle = {
+    position: "fixed",
+    left: props.left,
+    top: props.top,
+  };
+  const handleClick = (e) => {
+    e.stopPropagation();
+    close();
+  };
+  return (
+    <div style={outerStyle} onClick={handleClick}>
+      <div style={innerStyle}>{props.children}</div>
+    </div>
   );
 }
 
@@ -380,7 +434,11 @@ function App() {
         <Bets available={availableBets} onPlace={placeBet} />
 
         <h3>Long Bets</h3>
-        <LongBets toLose={longBets.toLose} toWin={longBets.toWin} />
+        <LongBets
+          toLose={longBets.toLose}
+          toWin={longBets.toWin}
+          available={[1, 2, 4]}
+        />
 
         <h3>Rolls</h3>
         <Dice rolled={rolled} onRoll={roll} />
