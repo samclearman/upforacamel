@@ -60,7 +60,12 @@ io.on("connection", (socket) => {
 
   socket.on("event", (event) => {
     console.log("got event ", event);
-    processEvent(event);
+    try {
+      processEvent(event);
+    } catch (e) {
+      console.log(e)
+    }
+    
     console.log("new game state");
     // console.log(util.inspect(gameState, {showHidden: false, depth: null}))
   });
