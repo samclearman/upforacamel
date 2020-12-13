@@ -13,6 +13,7 @@ export function makeNewPlayerIfNeeded(gameState, cookie) {
     console.log("cannot add players to a started game");
     return false;
   }
+  
   gameState.numberPlayers += 1;
   const newPlayer = _.cloneDeep(initialPlayerState);
   newPlayer.cookie = cookie;

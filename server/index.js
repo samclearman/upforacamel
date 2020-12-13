@@ -6,7 +6,6 @@ import {
   startGame,
   reduceEvent,
 } from "./reducer.js";
-import util from "util";
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -17,35 +16,57 @@ const io = new Server(httpServer, {
 });
 
 var gameState = getInitialGameState();
+var gameObservers = [];
+var registerGameObserver = (callback) => {
+  gameObservers.push(callback);
+}
+var issueUpdate = () => {
+  for (const o of gameObservers) {
+    o(gameState);
+  }
+}
+var newPlayer = (cookie) => {
+  makeNewPlayerIfNeeded(gameState, cookie);
+  issueUpdate();
+}
+var start = () => {
+  startGame();
+  issueUpdate();
+}
+var processEvent = (event) => {
+  reduceEvent(gameState, event);
+  issueUpdate();
+}
 
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
+
+  registerGameObserver((newState) => {
+    socket.emit("game_state", newState);
+  });
 
   socket.on("new_user", (socketId) => {
     console.log("got new user with id ", socketId);
   });
 
   socket.on("start_game", () => {
-    startGame();
-    socket.emit("game_state", gameState);
+    start()
   });
 
   socket.on("register_cookie", ({ cookie }) => {
     console.log("register cookie ", cookie);
-    makeNewPlayerIfNeeded(gameState, cookie);
-    socket.emit("game_state", gameState);
+    newPlayer(cookie);
+  });
+
+  socket.on("event", (event) => {
+    console.log("got event ", event);
+    processEvent(event);
+    console.log("new game state");
+    // console.log(util.inspect(gameState, {showHidden: false, depth: null}))
   });
 
   socket.emit("game_state", gameState);
 
-  socket.on("event", (event) => {
-    console.log("got event ", event);
-    reduceEvent(gameState, event);
-    console.log("new game state");
-    // console.log(util.inspect(gameState, {showHidden: false, depth: null}))
-
-    socket.emit("game_state", gameState);
-  });
 });
 
 // io.on("new_user", (socketId) => {
