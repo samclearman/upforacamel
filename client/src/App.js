@@ -88,17 +88,22 @@ function playerNumberToColor(n) {
 }
 
 function LongBet(props) {
-  const { camel, player } = props;
+  const { camel, player, onClick } = props;
   const color = camel ? camelToColor(camel) : playerNumberToColor(player);
   const longBetStyle = {
     border: `1px solid black`,
     backgroundColor: color,
     color: color,
   };
-  return <td style={longBetStyle}>{camel || player}</td>;
+  return (
+    <td style={longBetStyle} onClick={onClick}>
+      {camel || player}
+    </td>
+  );
 }
 
 function LongBetButton(props) {
+  const { available, onPlace } = props;
   const style = {
     border: "none",
   };
@@ -111,8 +116,8 @@ function LongBetButton(props) {
     setModalLeft(e.clientX);
     setShowingModal(true);
   };
-  const renderedAvailableLongBets = props.available.map((c) => (
-    <LongBet camel={c} />
+  const renderedAvailableLongBets = available.map((c) => (
+    <LongBet camel={c} onClick={() => onPlace(c)} />
   ));
   return (
     <td style={style} onClick={showLongBetModal}>
@@ -133,13 +138,27 @@ function LongBetButton(props) {
 }
 
 function LongBets(props) {
-  const { toWin, toLose, available } = props;
+  const { toWin, toLose, available, onPlace } = props;
   const renderedToWin = toWin
     .map((p) => <LongBet player={p} />)
-    .concat(<LongBetButton available={available}>{"→"}</LongBetButton>);
+    .concat(
+      <LongBetButton
+        available={available}
+        onPlace={(camel) => onPlace("toWin", camel)}
+      >
+        {"→"}
+      </LongBetButton>
+    );
   const renderedToLose = toLose
     .map((p) => <LongBet player={p} />)
-    .concat(<LongBetButton available={available}>{"←"}</LongBetButton>);
+    .concat(
+      <LongBetButton
+        available={available}
+        onPlace={(camel) => onPlace("toLose", camel)}
+      >
+        {"←"}
+      </LongBetButton>
+    );
   return (
     <table class="placed-bets">
       <tr class="placed-bets-to-win">{renderedToWin}</tr>
@@ -398,6 +417,12 @@ function App() {
     emitEvent("makeLegBet", { color: camelToColor(camel) });
   };
 
+  const placeLongBet = (bet, camel) => {
+    const kind = bet === "toWin" ? "long" : "short";
+    const color = camelToColor(camel);
+    emitEvent("makeRaceBet", { kind, camel });
+  };
+
   const roll = () => {
     emitEvent("rollDice", {});
   };
@@ -438,6 +463,7 @@ function App() {
           toLose={longBets.toLose}
           toWin={longBets.toWin}
           available={[1, 2, 4]}
+          onPlace={placeLongBet}
         />
 
         <h3>Rolls</h3>
