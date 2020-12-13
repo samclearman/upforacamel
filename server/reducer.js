@@ -636,22 +636,10 @@ var initialGameState = {
   },
   players: {},
   track: {
-    0: {
-      camels: ["red"],
-      tiles: [],
-    },
-    1: {
-      camels: ["green", "blue"], // blue on top of green
-      tiles: [],
-    },
-    2: {
-      camels: ["purple", "yellow"], // yellow on top of purple
-      tiles: [],
-    },
-    3: {
-      camels: [],
-      tiles: [],
-    },
+    0: _.cloneDeep(initialTrackState),
+    1: _.cloneDeep(initialTrackState),
+    2: _.cloneDeep(initialTrackState),
+    3: _.cloneDeep(initialTrackState),
     4: _.cloneDeep(initialTrackState),
     5: _.cloneDeep(initialTrackState),
     6: _.cloneDeep(initialTrackState),
