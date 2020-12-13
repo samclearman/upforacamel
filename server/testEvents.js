@@ -1,6 +1,6 @@
 import {
   getInitialGameState,
-  makeNewPlayerIfNeeded,
+  makeNewPlayer,
   startGame,
   reduceEvent,
 } from "./reducer.js";
@@ -150,12 +150,12 @@ var exampleEvents = [
 ];
 
 var gameState = getInitialGameState();
-makeNewPlayerIfNeeded(gameState, "hi1")
-makeNewPlayerIfNeeded(gameState, "hi2")
-makeNewPlayerIfNeeded(gameState, "hi3")
-makeNewPlayerIfNeeded(gameState, "hi4")
-makeNewPlayerIfNeeded(gameState, "hi5")
-makeNewPlayerIfNeeded(gameState, "hi6")
+makeNewPlayer(gameState, "hi1")
+makeNewPlayer(gameState, "hi2")
+makeNewPlayer(gameState, "hi3")
+makeNewPlayer(gameState, "hi4")
+makeNewPlayer(gameState, "hi5")
+makeNewPlayer(gameState, "hi6")
 startGame(gameState)
 for (var i = 0; i < exampleEvents.length; i++) {
     reduceEvent(gameState, exampleEvents[i])
