@@ -15,6 +15,19 @@ export function makeNewPlayer(gameState) {
 }
 
 export function startGame(gameState) {
+  // start the game!
+  var dice = _.cloneDeep(colorCamels).concat(_.cloneDeep(bwCamels))
+  var track = gameState.track
+  while (dice.length > 0) {
+    var color = _.sample(dice);
+    var number = _.sample([1, 2, 3]);
+    dice = _.filter(dice, (o) => { return o !== color });
+    if (colorCamels.includes(color)) {
+      track[number - 1]["camels"].push(color)
+    } else {
+      track[16 - number]["camels"].push(color)
+    }
+  }
   gameState.started = true;
 }
 
