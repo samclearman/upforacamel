@@ -52,6 +52,7 @@ function Bet(props) {
   }
   const betStyle = {
     border: `1px solid black`,
+    color: camelToTextColor(camel),
     backgroundColor: camelToColor(camel),
   };
   return (
@@ -96,10 +97,21 @@ function LongBet(props) {
   return <td style={longBetStyle}>{player}</td>;
 }
 
+function LongBetButton(props) {
+  const style = {
+    border: "none",
+  };
+  return <td style={style}>{props.children}</td>;
+}
+
 function LongBets(props) {
   const { toWin, toLose } = props;
-  const renderedToWin = toWin.map((p) => <LongBet player={p} />);
-  const renderedToLose = toLose.map((p) => <LongBet player={p} />);
+  const renderedToWin = toWin
+    .map((p) => <LongBet player={p} />)
+    .concat(<LongBetButton>{"→"}</LongBetButton>);
+  const renderedToLose = toLose
+    .map((p) => <LongBet player={p} />)
+    .concat(<LongBetButton>{"←"}</LongBetButton>);
   return (
     <table class="placed-bets">
       <tr class="placed-bets-to-win">{renderedToWin}</tr>
@@ -188,6 +200,25 @@ function camelToColor(camelNumber) {
       return "black";
     case -2:
       return "white";
+  }
+}
+
+function camelToTextColor(camelNumber) {
+  switch (camelNumber) {
+    case 1:
+      return "black";
+    case 2:
+      return "black";
+    case 3:
+      return "white";
+    case 4:
+      return "black";
+    case 5:
+      return "white";
+    case -1:
+      return "white";
+    case -2:
+      return "black";
   }
 }
 
