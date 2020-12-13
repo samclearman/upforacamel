@@ -20,23 +20,33 @@ function TrackTile(props) {
 }
 
 function Crowd(props) {
-  const { crowd } = props;
-  if (crowd) {
-    const { player, direction } = crowd;
-    const glyph = direction > 0 ? "→" : "←";
-    return (
-      <td>
-        <div class={`arrow-${player}`}>{glyph}</div>
-      </td>
-    );
-  }
-  return <td></td>;
+  const { crowd, onPlace } = props;
+  const [renderModal, showModal] = useModal();
+  const { player, direction } = crowd || {};
+  const glyph = direction > 0 ? "→" : "←";
+  const renderedCrowd = crowd ? (
+    <div class={`arrow-${player}`}>{glyph}</div>
+  ) : (
+    <td></td>
+  );
+  return (
+    <td onClick={showModal}>
+      {renderModal(
+        <>
+          <div onClick={() => onPlace(1)}>{"→"}</div>
+          <div onClick={() => onPlace(-1)}>{"←"}</div>
+        </>
+      )}
+    </td>
+  );
 }
 
 function Track(props) {
-  const { positions, crowds } = props;
+  const { positions, crowds, placeCrowd } = props;
   const renderedTiles = positions.map((p) => <TrackTile camels={p} />);
-  const renderedCrowds = crowds.map((c) => <Crowd crowd={c} />);
+  const renderedCrowds = crowds.map((c, i) => (
+    <Crowd crowd={c} onPlace={(direction) => placeCrowd(i, direction)} />
+  ));
   return (
     <table>
       <tr class="camels">{renderedTiles}</tr>
@@ -102,35 +112,45 @@ function LongBet(props) {
   );
 }
 
-function LongBetButton(props) {
-  const { available, onPlace } = props;
-  const style = {
-    border: "none",
-  };
+function useModal(children) {
   let [showingModal, setShowingModal] = useState(false);
   let [modalLeft, setModalLeft] = useState(0);
   let [modalTop, setModalTop] = useState(0);
-  const showLongBetModal = (e) => {
-    console.log(e);
+  const showModal = (e) => {
     setModalTop(e.clientY);
     setModalLeft(e.clientX);
     setShowingModal(true);
   };
-  const renderedAvailableLongBets = available.map((c) => (
-    <LongBet camel={c} onClick={() => onPlace(c)} />
-  ));
-  return (
-    <td style={style} onClick={showLongBetModal}>
-      {showingModal && (
+  return [
+    (children) =>
+      showingModal && (
         <Modal
           left={modalLeft}
           top={modalTop}
           close={() => setShowingModal(false)}
         >
-          <table>
-            <tr>{renderedAvailableLongBets}</tr>
-          </table>
+          {children}
         </Modal>
+      ),
+    showModal,
+  ];
+}
+
+function LongBetButton(props) {
+  const { available, onPlace } = props;
+  const style = {
+    border: "none",
+  };
+  const [renderModal, showLongBetModal] = useModal();
+  const renderedAvailableLongBets = available.map((c) => (
+    <LongBet camel={c} onClick={() => onPlace(c)} />
+  ));
+  return (
+    <td style={style} onClick={showLongBetModal}>
+      {renderModal(
+        <table>
+          <tr>{renderedAvailableLongBets}</tr>
+        </table>
       )}
       {props.children}
     </td>
@@ -423,6 +443,12 @@ function App() {
     emitEvent("makeRaceBet", { kind, camel });
   };
 
+  const placeCrowd = (position, direction) => {
+    const desertTileIndex = position;
+    const desertTileSide = direction === 1 ? "oasis" : "mirage";
+    emitEvent("placeDesertTile", { desertTileIndex, desertTileSide });
+  };
+
   const roll = () => {
     emitEvent("rollDice", {});
   };
@@ -453,7 +479,7 @@ function App() {
     <div style={containerStyle}>
       <div>
         <h3>Track</h3>
-        <Track positions={positions} crowds={crowds} />
+        <Track positions={positions} crowds={crowds} placeCrowd={placeCrowd} />
 
         <h3>Bets</h3>
         <Bets available={availableBets} onPlace={placeBet} />
