@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 function TrackTile(props) {
   const { camels } = props;
@@ -250,25 +250,24 @@ function makeSocket(setGameState) {
 
   socket.on("game_state", setGameState);
 
-  cookie = getCookie()
+  const cookie = getCookie();
   socket.emit("register_cookie", {
-    "cookie": cookie
+    cookie,
   });
 
   return socket;
 }
 
 function getCookie() {
-  var cookie = localStorage.getItem('camelCookie')
+  var cookie = localStorage.getItem("camelCookie");
   if (cookie) {
-    return cookie
+    return cookie;
   }
 
-  var cookie = uuidv4(); 
-  localStorage.setItem('camelCookie', cookie);
-  return cookie 
+  var cookie = uuidv4();
+  localStorage.setItem("camelCookie", cookie);
+  return cookie;
 }
-
 
 function App() {
   const [positions, setPositions] = useState([]);

@@ -2,8 +2,8 @@ import _ from "lodash";
 import util from "util";
 
 export function makeNewPlayerIfNeeded(gameState, cookie) {
-  for (var i = 0; i < gameState.players.length; i++) {
-    if (gameState.players[i].cookie === cookie) {
+  for (var i = 0; i < Object.keys(gameState.players).length; i++) {
+    if (gameState.players[i + 1].cookie === cookie) {
       console.log("this cookie is already associated with a player");
       return false;
     }
@@ -428,7 +428,7 @@ var initialLegBets = {
 };
 
 var initialGameState = {
-  numberPlayers: 3,
+  numberPlayers: 0,
   currentPlayer: "1",
   currentLeg: 0,
   started: false, // If started, new players cannot be added
@@ -436,14 +436,7 @@ var initialGameState = {
   overallShortBets: [],
   remainingLegBets: _.cloneDeep(initialLegBets),
   remainingDice: ["red", "green", "blue", "purple", "yellow", "black", "white"],
-  players: {
-    1: _.cloneDeep(initialPlayerState),
-    2: _.cloneDeep(initialPlayerState),
-    3: _.cloneDeep(initialPlayerState),
-    // "4": _.cloneDeep(initialPlayerState),
-    // "5": _.cloneDeep(initialPlayerState),
-    // "6": _.cloneDeep(initialPlayerState),
-  },
+  players: {},
   track: {
     0: {
       camels: ["red"],
