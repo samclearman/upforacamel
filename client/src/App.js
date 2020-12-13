@@ -51,7 +51,8 @@ function Bet(props) {
     return <td></td>;
   }
   const betStyle = {
-    border: `5px solid ${camelToColor(camel)}`,
+    border: `1px solid black`,
+    backgroundColor: camelToColor(camel),
   };
   return (
     <td style={betStyle} onClick={onPlace}>
@@ -88,8 +89,9 @@ function playerNumberToColor(n) {
 function LongBet(props) {
   const { player } = props;
   const longBetStyle = {
-    border: `5px solid ${playerNumberToColor(player)}`,
-    color: "white",
+    border: `1px solid black`,
+    backgroundColor: playerNumberToColor(player),
+    color: playerNumberToColor(player),
   };
   return <td style={longBetStyle}>{player}</td>;
 }
@@ -109,7 +111,8 @@ function LongBets(props) {
 function Die(props) {
   const { camel, roll } = props;
   const dieStyle = {
-    border: `5px solid ${camelToColor(camel)}`,
+    border: `1px solid black`,
+    backgroundColor: camelToColor(parseInt(camel)),
   };
 
   return <td style={dieStyle}>{roll}</td>;
@@ -117,7 +120,7 @@ function Die(props) {
 
 function Dice(props) {
   const { rolled, onRoll } = props;
-  const renderedDice = rolled.map(({ camel, roll }) => (
+  const renderedDice = Object.entries(rolled).map(([camel, roll]) => (
     <Die camel={camel} roll={roll} />
   ));
   return (
@@ -319,10 +322,15 @@ function App() {
     toWin: [5, 3, 2, 2, 5],
   };
 
-  const rolled = [
-    { camel: 2, roll: 3 },
-    { camel: -1, roll: 1 },
-  ];
+  const rolled = {
+    1: null,
+    2: 1,
+    3: null,
+    4: null,
+    5: 3,
+    "-1": 2,
+    "-2": null,
+  };
 
   const containerStyle = {
     display: "flex",
