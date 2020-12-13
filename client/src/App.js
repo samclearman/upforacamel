@@ -407,7 +407,7 @@ function getCookie() {
   return cookie;
 }
 
-function App() {
+function Game() {
   const [positions, setPositions] = useState([]);
   const [crowds, setCrowds] = useState([]);
   const [availableBets, setAvailableBets] = useState([]);
@@ -516,6 +516,16 @@ function App() {
       </div>
     </div>
   );
+}
+
+function App() {
+  const currentGame = new URL(window.location.href).searchParams.get("game");
+  if (!currentGame) {
+    // return start game screen
+    return "not implemented";
+  } else {
+    return <Game id={currentGame} />;
+  }
 }
 
 export default App;
