@@ -41,6 +41,7 @@ export function reduceEvent(currentState, event) {
       makeRaceBet(currentState, event);
       break;
     case "pickPartner":
+      pickPartner(currentState, event);
       break;
   }
   // 1-indexed
@@ -68,7 +69,7 @@ function validateEvent(currentState, event) {
       }
       break;
     case "rollDice":
-      // todo
+      // does anything need to be checked?
       break;
     case "placeDesertTile":
       var desertTileIndex = event.data.desertTileIndex;
@@ -84,7 +85,7 @@ function validateEvent(currentState, event) {
       if(track[desertTileIndex]["camels"].length > 0) {
         throw new Error(`Invalid move. There are already camels ${track[desertTileIndex]["camels"]} on this tile`)
       }
-      
+
       function checkDesertTileIndex(index) {
         if (
           index < 16 &&
@@ -132,6 +133,16 @@ function validateEvent(currentState, event) {
       }
       break;
     case "pickPartner":
+      var partner = event.data.partner
+      if (currentState.numberPlayers < 6) {
+        throw new Error(`Invalid move. Can only pick partners in games of 6 or more players.`)
+      }
+      if (currentState.players[currentPlayer]["legs"][currentLegNum].partner) {
+        throw new Error(`Invalid move. You already have a partner in this leg.`)
+      }
+      if (currentState.players[partner]["legs"][currentLegNum].partner) {
+        throw new Error(`Invalid move. ${partner} already has a partner in this leg.`)
+      }
       break;
   }
 }
@@ -175,6 +186,15 @@ function makeRaceBet(currentState, event) {
     player: currentPlayer,
     color: color,
   });
+}
+
+function pickPartner(currentState, event) {
+  const currentPlayer = event.player
+  const partner = event.data.partner
+  const currentLegNum = currentState.currentLegNum
+
+  currentState.players[currentPlayer]["legs"][currentLegNum].partner = partner
+  currentState.players[partner]["legs"][currentLegNum].partner = currentPlayer
 }
 
 function placeDesertTile(currentState, event) {
@@ -475,17 +495,22 @@ function getLoserCamel(currentState) {
 }
 
 function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
-  // add the scoring
   for (var i = 0; i < currentState.numberPlayers; i++) {
+    maxPartnerPayoff = 0
     var playerPosition =
       currentState.players[i + 1]["legs"][currentState.currentLegNum];
     var score = playerPosition.score;
     score += playerPosition.rolls;
+    if (playerPosition.rolls > 0) {
+      maxPartnerPayoff = 1
+    }
     for (let k in playerPosition.legBets) {
       if (k === winnerCamel) {
         score += _.sum(playerPosition.legBets[k]);
+        maxPartnerPayoff = _.max(playerPosition.legBets[k])
       } else if (k === runnerUpCamel) {
         score += playerPosition.legBets[k].length;
+        maxPartnerPayoff = Math.max(maxPartnerPayoff, 1)
       } else {
         score -= playerPosition.legBets[k].length;
       }
@@ -493,7 +518,13 @@ function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
     currentState.players[i + 1]["legs"][currentState.currentLegNum][
       "score"
     ] = Math.max(score, 0); // can't go negative
+    
+    if (playerPosition.partner) {
+      currentState.players[playerPosition.partner][currentLegNum].score = maxPartnerPayoff
+    }
   }
+
+  //todo add partnership payoffs
 }
 
 function newLeg(currentState) {
@@ -521,7 +552,7 @@ var initialPlayerLegState = {
     green: [],
     yellow: [],
   },
-  partner: [],
+  partner: null,
   rolls: 0,
   desertTile: -100, // -100 means unused
   score: 0,

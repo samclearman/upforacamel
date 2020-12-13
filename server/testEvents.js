@@ -50,9 +50,30 @@ var exampleEvents = [
   },
   {
     type: "makeLegBet",
-    player: "1",
+    player: "4",
     data: {
       color: "yellow",
+    },
+  },
+  {
+    type: "makeLegBet",
+    player: "5",
+    data: {
+      color: "red",
+    },
+  },
+  {
+    type: "makeLegBet",
+    player: "6",
+    data: {
+      color: "green",
+    },
+  },
+  {
+    type: "pickPartner",
+    player: "1",
+    data: {
+      partner: "2",
     },
   },
   {
@@ -64,16 +85,35 @@ var exampleEvents = [
     },
   },
   {
-    type: "rollDice",
+    type: "pickPartner",
     player: "3",
+    data: {
+      partner: "4",
+    },
+  },
+  {
+    type: "makeRaceBet",
+    player: "4",
+    data: {
+      kind: "long",
+      color: "red",
+    },
+  },
+  {
+    type: "rollDice",
+    player: "5",
+  },
+  {
+    type: "rollDice",
+    player: "6",
   },
   {
     type: "makeRaceBet",
     player: "1",
     data: {
-      kind: "long",
-      color: "red",
-    },
+      "color": "red",
+      "kind": "long",
+    }
   },
   {
     type: "placeDesertTile",
@@ -89,6 +129,9 @@ var gameState = getInitialGameState();
 makeNewPlayerIfNeeded(gameState, "hi1")
 makeNewPlayerIfNeeded(gameState, "hi2")
 makeNewPlayerIfNeeded(gameState, "hi3")
+makeNewPlayerIfNeeded(gameState, "hi4")
+makeNewPlayerIfNeeded(gameState, "hi5")
+makeNewPlayerIfNeeded(gameState, "hi6")
 startGame(gameState)
 for (var i = 0; i < exampleEvents.length; i++) {
     reduceEvent(gameState, exampleEvents[i])
