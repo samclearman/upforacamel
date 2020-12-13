@@ -32,10 +32,19 @@ function Crowd(props) {
   return (
     <td onClick={showModal}>
       {renderModal(
-        <>
-          <div onClick={() => onPlace(1)}>{"→"}</div>
-          <div onClick={() => onPlace(-1)}>{"←"}</div>
-        </>
+        <table>
+          <tr>
+            <td
+              style={{ backgroundColor: "white" }}
+              onClick={() => onPlace(-1)}
+            >
+              {"←"}
+            </td>
+            <td style={{ backgroundColor: "white" }} onClick={() => onPlace(1)}>
+              {"→"}
+            </td>
+          </tr>
+        </table>
       )}
     </td>
   );
