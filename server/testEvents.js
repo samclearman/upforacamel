@@ -3,6 +3,7 @@ import {
   makeNewPlayer,
   startGame,
   reduceEvent,
+  getPlayerExistingRaceBets
 } from "./reducer.js";
 import util from "util";
 
@@ -159,5 +160,8 @@ makeNewPlayer(gameState, "hi6")
 startGame(gameState)
 for (var i = 0; i < exampleEvents.length; i++) {
     reduceEvent(gameState, exampleEvents[i])
+    if (exampleEvents[i].type === "makeRaceBet") {
+      getPlayerExistingRaceBets(gameState, exampleEvents[i].player)
+    }
     console.log(util.inspect(gameState, {showHidden: false, depth: null}))
 }

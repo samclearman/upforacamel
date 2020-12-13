@@ -178,7 +178,7 @@ function makeLegBet(currentState, event) {
   ].push(payoff);
 }
 
-function getPlayerExistingRaceBets(currentState, player) {
+export function getPlayerExistingRaceBets(currentState, player) {
   console.log("gper", currentState);
   var longRaceBets = [];
   for (const o of currentState["longRaceBets"]) {
