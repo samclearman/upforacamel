@@ -24,11 +24,7 @@ function Crowd(props) {
   const [renderModal, showModal] = useModal();
   const { player, direction } = crowd || {};
   const glyph = direction > 0 ? "→" : "←";
-  const renderedCrowd = crowd ? (
-    <div class={`arrow-${player}`}>{glyph}</div>
-  ) : (
-    <td></td>
-  );
+  const renderedCrowd = crowd ? <div>{glyph}</div> : <div></div>;
   return (
     <td onClick={showModal}>
       {renderModal(
@@ -46,6 +42,7 @@ function Crowd(props) {
           </tr>
         </table>
       )}
+      {renderedCrowd}
     </td>
   );
 }
@@ -340,21 +337,26 @@ function getPositions(gameState) {
 }
 
 function getCrowds(gameState) {
-  // return Object.values(gameState.track).map((v) =>
-  //   v.tiles.map((c) => tileToNumber(t))
-  // );
-  const crowds = [];
-  for (let i = 0; i < 16; i++) {
-    crowds.push(null);
-    for (const n in gameState.players) {
-      const v = Object.values(gameState.players[n].legs).slice(-1)[0]
-        .desertTile;
-      if (Math.abs(v) === i) {
-        crowds[i] = { player: n + 1, direction: v ? v / Math.abs(v) : 1 };
-      }
-    }
-  }
-  return crowds;
+  return Object.values(gameState.track).map((v) =>
+    v.tiles.length
+      ? {
+          player: 1,
+          direction: tileToNumber(v.tiles[0]),
+        }
+      : null
+  );
+  // const crowds = [];
+  // for (let i = 0; i < 16; i++) {
+  //   crowds.push(null);
+  //   for (const n in gameState.players) {
+  //     const v = Object.values(gameState.players[n].legs).slice(-1)[0]
+  //       .desertTile;
+  //     if (Math.abs(v) === i) {
+  //       crowds[i] = { player: n + 1, direction: v ? v / Math.abs(v) : 1 };
+  //     }
+  //   }
+  // }
+  // return crowds;
 }
 
 function getAvailableBets(gameState) {
