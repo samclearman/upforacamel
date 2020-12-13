@@ -217,14 +217,16 @@ function pickBlackOrWhiteCamel(track, rolledDiceColor) {
     track,
     "black"
   );
+  console.log(`black: position ${blackPosition} and camels to move ${blackCamelsToMove}`)
   var [whitePosition, whiteCamelsToMove] = getCamelPositionAndStack(
     track,
     "white"
   );
+  console.log(`white: position ${whitePosition} and camels to move ${whiteCamelsToMove}`)
 
   var camelColor = null;
   if (blackCamelsToMove.length === 1) {
-    if (whiteCamelsToMove === 1) {
+    if (whiteCamelsToMove.length === 1) {
       // if neither camel is carrying anyone, move whichever was rolled
       camelColor = rolledDiceColor;
     } else if (whiteCamelsToMove[1] === "black") {
@@ -235,7 +237,7 @@ function pickBlackOrWhiteCamel(track, rolledDiceColor) {
       camelColor = "white";
     }
   } else {
-    if (whiteCamelsToMove === 1) {
+    if (whiteCamelsToMove.length === 1) {
       // if black camel is carrying white, move white; else black
       if (blackCamelsToMove[1] === "white") {
         camelColor = "white";
@@ -290,6 +292,7 @@ function rollDice(currentState, event) {
   }
   var rolledDiceNumber = _.sample([1, 2, 3]);
   console.log(`color ${rolledDiceColor}; number ${rolledDiceNumber}`);
+  
   currentLeg.rolledDice.push({
     color: rolledDiceColor,
     number: rolledDiceNumber,
@@ -324,9 +327,9 @@ function rollDice(currentState, event) {
   if (track[newCamelPosition]["tiles"].length > 0) {
     updatePlayerScoreDesertTile(currentState, newCamelPosition);
     if (track[newCamelPosition]["tiles"][0] === "+") {
-      newCamelPosition += 1;
+      newCamelPosition += isColorCamel(camelColor) ? 1 : -1;
     } else {
-      newCamelPosition -= 1;
+      newCamelPosition += isColorCamel(camelColor) ? -1 : +1;
       placeUnder = true;
     }
   }
@@ -335,7 +338,7 @@ function rollDice(currentState, event) {
     moveCamel(track, camelColor, camelPosition, null, null);
     scoreGame(currentState, camelsToMove);
   }
-
+  console.log(`moving camel ${camelColor} from ${camelPosition} to ${newCamelPosition}`)
   moveCamel(track, camelColor, camelPosition, newCamelPosition, placeUnder);
 
   if (currentState.legs[currentState.currentLegNum].remainingDice.length === 1) {
