@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
   console.log("connection", socket.id);
 
   registerGameObserver((newState) => {
-    socket.emit("game_state", newState);
+    socket.emit("game_state", { ...newState, longRaceBets: null, shortRaceBets: null});
   });
 
   socket.on("new_user", (socketId) => {
@@ -68,9 +68,5 @@ io.on("connection", (socket) => {
   socket.emit("game_state", gameState);
 
 });
-
-// io.on("new_user", (socketId) => {
-//     console.log("got new user with id ", socketId);
-// });
 
 httpServer.listen(3030);

@@ -1,24 +1,22 @@
 import _ from "lodash";
-import util from "util";
 
 export function makeNewPlayerIfNeeded(gameState, cookie) {
   for (var i = 0; i < Object.keys(gameState.players).length; i++) {
     if (gameState.players[i + 1].cookie === cookie) {
       console.log("this cookie is already associated with a player");
-      return false;
+      return;
     }
   }
 
   if (gameState.started) {
     console.log("cannot add players to a started game");
-    return false;
+    return;
   }
-  
+
   gameState.numberPlayers += 1;
   const newPlayer = _.cloneDeep(initialPlayerState);
   newPlayer.cookie = cookie;
   gameState.players[gameState.numberPlayers.toString()] = newPlayer;
-  return true;
 }
 
 export function startGame(gameState) {
@@ -28,32 +26,18 @@ export function startGame(gameState) {
 export function reduceEvent(currentState, event) {
   validateEvent(currentState, event);
 
-  var currentPlayer = event.player;
-  var currentLeg = currentState.currentLeg;
   switch (event.type) {
-    case "joinGame":
-      break;
-    case "startGame":
-      break;
     case "makeLegBet":
-      var selectedColor = event.data.color;
-      if (currentState.remainingLegBets[selectedColor].length === 0) {
-        throw new Error("no more leg bets for color");
-      }
-      var payoff = currentState.remainingLegBets[selectedColor].pop();
-      // add error handling if array is empty
-      currentState.players[currentPlayer]["legs"][currentLeg]["legBets"][
-        selectedColor
-      ].push(payoff);
+      makeLegBet(currentState, event)
       break;
     case "rollDice":
-      updateCamelPosition(currentState, event);
+      rollDice(currentState, event);
       break;
     case "placeDesertTile":
-      updateTilePosition(currentState, event);
+      placeDesertTile(currentState, event);
       break;
-    case "makeOverallRaceBet":
-      updateOverallRaceBet(currentState, event);
+    case "makeRaceBet":
+      makeRaceBet(currentState, event);
       break;
     case "pickPartner":
       break;
@@ -78,7 +62,10 @@ function validateEvent(currentState, event) {
   }
   switch (event.type) {
     case "makeLegBet":
-      // add error handling if array is empty
+      var selectedColor = event.data.color;
+      if (currentState.remainingLegBets[selectedColor].length === 0) {
+        throw new Error("no more leg bets for color");
+      }
       break;
     case "rollDice":
       // todo
@@ -129,14 +116,14 @@ function validateEvent(currentState, event) {
       }
 
       break;
-    case "makeOverallRaceBet":
+    case "makeRaceBet":
       var color = event.data.color;
 
       // player cannot make bet if they already made bet
-      var raceBets = currentState["players"][currentPlayer]["raceBets"];
+      var raceBets = getPlayerRaceBet(currentPlayer)
       if (
-        raceBets["long"].includes(color) ||
-        raceBets["short"].includes(color)
+        raceBets["longRaceBets"].includes(color) ||
+        raceBets["shortRaceBets"].includes(color)
       ) {
         throw new Error("you have already made a bet with this color");
       }
@@ -146,18 +133,46 @@ function validateEvent(currentState, event) {
   }
 }
 
-function updateOverallRaceBet(currentState, event) {
+function makeLegBet(currentState, event) {
+    var currentPlayer = event.player;
+    var currentLeg = currentState.currentLeg;
+    var selectedColor = event.data.color;
+    var payoff = currentState.remainingLegBets[selectedColor].pop();
+    currentState.players[currentPlayer]["legs"][currentLeg]["legBets"][selectedColor].push(payoff);
+}
+
+function getPlayerRaceBet(currentState, player) {
+    var longRaceBets = [];
+    for (o in currentState["longRaceBets"]) {
+        if (o.player == player) {
+            longRaceBets.push(o.color)
+        }
+    }
+    var shortRaceBets = [];
+    for (o in currentState["shortRaceBets"]) {
+        if (o.player == player) {
+            shortRaceBets.push(o.color)
+        }
+    }
+    return {
+        "longRaceBets": longRaceBets,
+        "shortRaceBets": shortRaceBets,
+    }
+  }
+
+function makeRaceBet(currentState, event) {
   var kind = event.data.kind;
   var color = event.data.color;
   var currentPlayer = event.player;
 
-  currentState["players"][currentPlayer]["raceBets"][kind].push(color);
-
-  var category = kind === "long" ? "overallLongBets" : "overallShortBets";
-  currentState[category].push(color);
+  var category = kind === "long" ? "longRaceBets" : "shortRaceBets";
+  currentState[category].push({
+      "player": currentPlayer,
+      "color": color
+  });
 }
 
-function updateTilePosition(currentState, event) {
+function placeDesertTile(currentState, event) {
   var track = currentState.track;
   var currentLeg = currentState.currentLeg;
   var currentPlayer = event.player;
@@ -180,12 +195,13 @@ function updateTilePosition(currentState, event) {
 
 var colorCamels = ["red", "blue", "purple", "yellow", "green"];
 var bwCamels = ["black", "white"];
+var allCamels = colorCamels.concat(bwCamels)
 
 function isColorCamel(color) {
   return colorCamels.includes(color);
 }
 
-function updateCamelPosition(currentState, event) {
+function rollDice(currentState, event) {
   var rolledDiceColor =
     currentState.remainingDice[
       Math.floor(Math.random() * currentState.remainingDice.length)
@@ -277,9 +293,10 @@ function scoreGame(currentState, camelsToMove) {
   if (camelsToMove.length > 0) {
     var runnerUpCamel = camelsToMove.pop();
   } else {
-    runnerUpCamel, (dummy = getWinnerRunnerUp(currentState));
+    runnerUpCamel, dummy = getWinnerRunnerUp(currentState);
   }
 
+  console.log(`Winning camel is ${winningCamel}. Runner up is ${runnerUpCamel}`)
   scoreLeg(currentState, winningCamel, runnerUpCamel);
 
   // sum up leg scores
@@ -295,8 +312,24 @@ function scoreGame(currentState, camelsToMove) {
   }
   console.log(scores);
 
+  // todo sum up long bet scores
+
+  payoffs = [8,5,3,2] // everyone gets at least 1
+  for (o in gameState.longRaceBets) {
+      if (o.color == winningCamel) {
+          scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1
+      }
+  }
+
+  lastCamel = "blue" // todo
+  payoffs = [8,5,3,2] // everyone gets at least 1
+  for (o in gameState.shortRaceBets) {
+      if (o.color == lastCamel) {
+          scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1
+      }
+  }
+
   throw new Error("Game over");
-  // sum up long term scores
 }
 
 function updatePlayerScoreDesertTile(currentState, camelPosition) {
@@ -357,7 +390,7 @@ function scoreLeg(currentState, winningCamel, runnerUpCamel) {
     }
     currentState.players[i + 1]["legs"][currentState.currentLeg][
       "score"
-    ] = score;
+    ] = Math.max(score, 0); // can't go negative
   }
 }
 
@@ -409,10 +442,6 @@ var initialPlayerState = {
   legs: {
     0: _.cloneDeep(initialPlayerLegState),
   },
-  raceBets: {
-    long: [],
-    short: [],
-  },
 };
 
 var initialTrackState = {
@@ -433,8 +462,8 @@ var initialGameState = {
   currentPlayer: "1",
   currentLeg: 0,
   started: false, // If started, new players cannot be added
-  overallLongBets: [],
-  overallShortBets: [],
+  longRaceBets: [],
+  shortRaceBets: [],
   remainingLegBets: _.cloneDeep(initialLegBets),
   remainingDice: ["red", "green", "blue", "purple", "yellow", "black", "white"],
   players: {},
@@ -502,6 +531,7 @@ function addDiceRolls(num) {
   }
   return toReturn;
 }
+
 var exampleEvents = [
   {
     type: "makeLegBet",
@@ -531,7 +561,7 @@ var exampleEvents = [
     player: "1",
   },
   {
-    type: "makeOverallRaceBet",
+    type: "makeRaceBet",
     player: "1",
     data: {
       kind: "long",
@@ -540,8 +570,7 @@ var exampleEvents = [
   },
 ];
 
-var gameState = initialGameState;
-
+// var gameState = initialGameState;
 // for (var i = 0; i < events.length; i++) {
 //     reduceEvent(gameState, events[i])
 //     console.log(util.inspect(gameState, {showHidden: false, depth: null}))
