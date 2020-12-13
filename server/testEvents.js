@@ -123,6 +123,30 @@ var exampleEvents = [
       desertTileSide: "mirage",
     },
   },
+  {
+    type: "rollDice",
+    player: "3",
+  },
+  {
+    type: "rollDice",
+    player: "4",
+  },
+  {
+    type: "rollDice",
+    player: "5",
+  },
+  {
+    type: "rollDice",
+    player: "6",
+  },
+  {
+    type: "rollDice",
+    player: "1",
+  },
+  {
+    type: "rollDice",
+    player: "2",
+  },
 ];
 
 var gameState = getInitialGameState();

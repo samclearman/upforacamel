@@ -495,10 +495,10 @@ function getLoserCamel(currentState) {
 }
 
 function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
+  const currentLegNum = currentState.currentLegNum
   for (var i = 0; i < currentState.numberPlayers; i++) {
-    maxPartnerPayoff = 0
-    var playerPosition =
-      currentState.players[i + 1]["legs"][currentState.currentLegNum];
+    var maxPartnerPayoff = 0
+    var playerPosition = currentState.players[i + 1]["legs"][currentLegNum];
     var score = playerPosition.score;
     score += playerPosition.rolls;
     if (playerPosition.rolls > 0) {
@@ -515,12 +515,14 @@ function scoreLeg(currentState, winnerCamel, runnerUpCamel) {
         score -= playerPosition.legBets[k].length;
       }
     }
-    currentState.players[i + 1]["legs"][currentState.currentLegNum][
-      "score"
-    ] = Math.max(score, 0); // can't go negative
+    currentState.players[i + 1]["legs"][currentLegNum]["score"] = Math.max(score, 0); // can't go negative
     
+    if (maxPartnerPayoff < 0) {
+      throw new Error('Something went wrong. Partner payoff cannot be negative')
+    }
+
     if (playerPosition.partner) {
-      currentState.players[playerPosition.partner][currentLegNum].score = maxPartnerPayoff
+      currentState.players[playerPosition.partner]["legs"][currentLegNum].score = maxPartnerPayoff
     }
   }
 
