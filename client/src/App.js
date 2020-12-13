@@ -384,14 +384,13 @@ function makeSocket(setGameState) {
   const socket = io("http://localhost:3030");
   socket.on("connect", () => {
     console.log("connect", socket.id);
+    const cookie = getCookie();
+    socket.emit("register_cookie", {
+      cookie,
+    });
   });
 
   socket.on("game_state", setGameState);
-
-  const cookie = getCookie();
-  socket.emit("register_cookie", {
-    cookie,
-  });
 
   return socket;
 }

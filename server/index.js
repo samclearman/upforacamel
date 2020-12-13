@@ -17,32 +17,36 @@ const io = new Server(httpServer, {
   },
 });
 
-var gameState = getInitialGameState();
-var gameObservers = {};
-var cookies = {};
-var registerGameObserver = (callback) => {
+const gameState = getInitialGameState();
+const gameObservers = {};
+const cookies = {};
+const registerGameObserver = (callback) => {
   const id = uuidv4();
   gameObservers[id] = { callback };
   return id;
 };
-var issueUpdate = () => {
+const issueUpdate = () => {
   for (const o of Object.values(gameObservers)) {
-    o.callback(redactGameState(gameState, o.player));
+    const players = (o.cookie && cookies[o.cookie].players) || [];
+    o.callback(redactGameState(gameState, players));
   }
 };
-var registerCookie = (id, cookie) => {
-  if (cookie in cookies) {
+const registerCookie = (id, cookie) => {
+  console.log("registering cookie");
+  if (!(cookie in cookies)) {
+    console.log("making new player");
     const player = makeNewPlayer(gameState);
     cookies[cookie] = { players: [player] };
   }
-  gameObservers.id.cookie = cookie;
+  gameObservers[id].cookie = cookie;
   issueUpdate();
 };
-var start = () => {
+const start = () => {
   startGame();
   issueUpdate();
 };
-var processEvent = (event) => {
+const processEvent = (event) => {
+  console.log(`processing`, event, gameState);
   reduceEvent(gameState, event);
   issueUpdate();
 };
@@ -60,7 +64,7 @@ io.on("connection", (socket) => {
 
   socket.on("register_cookie", ({ cookie }) => {
     console.log("register cookie ", cookie);
-    makePlayer(cookie);
+    registerCookie(id, cookie);
   });
 
   socket.on("event", (event) => {

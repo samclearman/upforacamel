@@ -135,7 +135,7 @@ function validateEvent(currentState, event) {
     case "makeRaceBet":
       var color = event.data.color;
 
-      var raceBets = getPlayerExistingRaceBets(currentPlayer);
+      var raceBets = getPlayerExistingRaceBets(currentState, currentPlayer);
       if (
         raceBets["longRaceBets"].includes(color) ||
         raceBets["shortRaceBets"].includes(color)
@@ -179,14 +179,15 @@ function makeLegBet(currentState, event) {
 }
 
 function getPlayerExistingRaceBets(currentState, player) {
+  console.log("gper", currentState);
   var longRaceBets = [];
-  for (o in currentState["longRaceBets"]) {
+  for (const o of currentState["longRaceBets"]) {
     if (o.player == player) {
       longRaceBets.push(o.color);
     }
   }
   var shortRaceBets = [];
-  for (o in currentState["shortRaceBets"]) {
+  for (const o of currentState["shortRaceBets"]) {
     if (o.player == player) {
       shortRaceBets.push(o.color);
     }
@@ -598,7 +599,6 @@ var initialPlayerLegState = {
 };
 
 var initialPlayerState = {
-  cookie: "",
   screenName: "",
   legs: {
     0: _.cloneDeep(initialPlayerLegState),
@@ -678,10 +678,10 @@ export function getInitialGameState() {
   return _.cloneDeep(initialGameState);
 }
 
-export function redactGameState(gameState, player) {
+export function redactGameState(gameState, players) {
   const redacted = _.cloneDeep(gameState);
-  if (player) {
-    gameState.players[player].raceBets = getPlayerExistingRaceBets(
+  for (const player of players) {
+    redacted.players[player].raceBets = getPlayerExistingRaceBets(
       gameState,
       player
     );
