@@ -8,7 +8,9 @@ import util from "util";
 
 export function makeNewPlayer(gameState) {
   if (gameState.status !== "init") {
-    console.log(`Invalid move. Player cannot be added to a ${gameState.status} game`);
+    console.log(
+      `Invalid move. Player cannot be added to a ${gameState.status} game`
+    );
     return;
   }
 
@@ -21,7 +23,9 @@ export function makeNewPlayer(gameState) {
 
 export function startGame(gameState) {
   if (gameState.status !== "init") {
-    console.log(`Invalid move. Player cannot start a game with status ${gameState.status}`);
+    console.log(
+      `Invalid move. Player cannot start a game with status ${gameState.status}`
+    );
     return;
   }
 
@@ -44,7 +48,7 @@ export function startGame(gameState) {
 
 export function reduceEvent(gameState, event) {
   validateEvent(gameState, event);
-  gameState.events.push(event)
+  gameState.events.push(event);
 
   switch (event.type) {
     case "makeLegBet":
@@ -84,9 +88,8 @@ function validateEvent(gameState, event) {
     case "makeLegBet":
       var selectedColor = event.data.color;
       if (
-        gameState.legs[gameState.currentLegNum].remainingLegBets[
-          selectedColor
-        ].length === 0
+        gameState.legs[gameState.currentLegNum].remainingLegBets[selectedColor]
+          .length === 0
       ) {
         throw new Error("Invalid move. Player has no more leg bets for color");
       }
@@ -384,7 +387,7 @@ function rollDice(gameState, event) {
   if (newCamelPosition > 15) {
     moveCamel(track, camelColor, camelPosition, null, null);
     scoreGame(gameState, camelsToMove);
-    return
+    return;
   }
 
   var placeUnder = false;
@@ -401,16 +404,14 @@ function rollDice(gameState, event) {
   if (newCamelPosition > 15) {
     moveCamel(track, camelColor, camelPosition, null, null);
     scoreGame(gameState, camelsToMove);
-    return
+    return;
   }
   console.log(
     `moving camel ${camelColor} from ${camelPosition} to ${newCamelPosition}`
   );
   moveCamel(track, camelColor, camelPosition, newCamelPosition, placeUnder);
 
-  if (
-    gameState.legs[gameState.currentLegNum].remainingDice.length === 1
-  ) {
+  if (gameState.legs[gameState.currentLegNum].remainingDice.length === 1) {
     var [winnerCamel, runnerUpCamel] = getWinnerRunnerUp(gameState);
     scoreLeg(gameState, winnerCamel, runnerUpCamel);
     newLeg(gameState);
@@ -434,9 +435,7 @@ function getWinnerRunnerUpLoser(gameState, camelsToMove) {
     }
   }
   if (!runnerUpCamel) {
-    var [runnerUpCamel, dummy] = getWinnerRunnerUp(
-      gameState
-    );
+    var [runnerUpCamel, dummy] = getWinnerRunnerUp(gameState);
   }
   if (!loserCamel) {
     loserCamel = getLoserCamel(gameState);
@@ -445,7 +444,7 @@ function getWinnerRunnerUpLoser(gameState, camelsToMove) {
 }
 
 function scoreGame(gameState, camelsToMove) {
-  console.log("SCORING GAME")
+  console.log("SCORING GAME");
   const [winnerCamel, runnerUpCamel, loserCamel] = getWinnerRunnerUpLoser(
     gameState,
     camelsToMove
@@ -484,9 +483,9 @@ function scoreGame(gameState, camelsToMove) {
       scores[o.player] -= 1;
     }
   }
-  console.log("SAVING SCORES")
-  gameState.finalScore = scores
-  gameState.status = "ended"
+  console.log("SAVING SCORES");
+  gameState.finalScore = scores;
+  gameState.status = "ended";
   // throw new Error(`Game over with scores ${scores}`);
 }
 
@@ -494,12 +493,9 @@ function updatePlayerScoreDesertTile(gameState, camelPosition) {
   var foundTileOwner = false;
   for (var i = 0; i < gameState.numberPlayers; i++) {
     var desertTile =
-      gameState.players[i + 1]["legs"][gameState.currentLegNum]
-        .desertTile;
+      gameState.players[i + 1]["legs"][gameState.currentLegNum].desertTile;
     if (Math.abs(desertTile) == camelPosition) {
-      gameState.players[i + 1]["legs"][gameState.currentLegNum][
-        "score"
-      ] += 1;
+      gameState.players[i + 1]["legs"][gameState.currentLegNum]["score"] += 1;
       foundTileOwner = true;
     }
   }
@@ -595,9 +591,9 @@ function newLeg(gameState) {
   }
 
   for (var i = 0; i < gameState.numberPlayers; i++) {
-    gameState.players[i + 1]["legs"][
-      gameState.currentLegNum
-    ] = _.cloneDeep(initialPlayerLegState);
+    gameState.players[i + 1]["legs"][gameState.currentLegNum] = _.cloneDeep(
+      initialPlayerLegState
+    );
   }
 }
 
