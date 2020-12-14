@@ -411,7 +411,7 @@ function getPlayers(gameState) {
   });
 }
 
-function makeSocket(gameId, setGameState) {
+function makeSocket(gameId, handleEvent) {
   const socket = io("http://localhost:3030");
   socket.on("connect", () => {
     const cookie = getCookie();
@@ -421,8 +421,8 @@ function makeSocket(gameId, setGameState) {
     });
   });
 
-  socket.on("game_state", setGameState);
-
+  socket.on("game_state", (e) => handleEvent("game_state", e));
+  socket.on("player_assignment", (e) => handleEvent("player_assignment", e));
   return socket;
 }
 
@@ -444,6 +444,7 @@ function Game(props) {
   const [availableBets, setAvailableBets] = useState([]);
   const [players, setPlayers] = useState([]);
   const [status, setStatus] = useState([]);
+  const [currentPlayer, setCurrentPlayer] = useState("noplayer");
   const [_gameState, _setGameState] = useState({});
 
   const setGameState = (gameState) => {
@@ -455,11 +456,20 @@ function Game(props) {
     setStatus(gameState.status);
     _setGameState(gameState);
   };
+  const handleEvent = (type, event) => {
+    console.log("handling", type, event);
+    switch (type) {
+      case "game_state":
+        setGameState(event);
+        break;
+      case "player_assignment":
+        setCurrentPlayer(event.players[0]);
+        break;
+    }
+  };
   const [socket, setSocket] = useState(() => {
-    return makeSocket(id, setGameState);
+    return makeSocket(id, handleEvent);
   });
-
-  socket.on("game_state", (gameState) => {});
 
   const emitEvent = (type, data) => {
     if (!_gameState.currentPlayer) {
@@ -564,7 +574,9 @@ function Game(props) {
               number={i + 1}
               player={p}
               active={isActive(i)}
-              editable={status === "init"}
+              editable={
+                status === "init" && (i + 1).toString() === currentPlayer
+              }
               changeName={changeName}
             />
           ))}
