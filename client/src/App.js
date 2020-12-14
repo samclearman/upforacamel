@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import "./App.css";
 import { v4 as uuidv4 } from "uuid";
@@ -256,7 +256,7 @@ function Player(props) {
   return (
     <div style={playerStyle}>
       <h3>{player.name}</h3>
-
+      <div>{player.money}</div>
       <table class="player-bets">
         <tr>{renderedBets}</tr>
       </table>
@@ -376,16 +376,20 @@ function getPlayers(gameState) {
         bets.push({ camel: camelToNumber(c), payout });
       }
     }
-    return { name: n, money: 0, bets };
+    let money = 0;
+    if (gameState.finalScore) {
+      money = gameState.finalScore[n] || 0;
+    }
+    return { name: n, money, bets };
   });
 }
 
-function makeSocket(setGameState) {
+function makeSocket(gameId, setGameState) {
   const socket = io("http://localhost:3030");
   socket.on("connect", () => {
-    console.log("connect", socket.id);
     const cookie = getCookie();
-    socket.emit("register_cookie", {
+    socket.emit("join", {
+      gameId,
       cookie,
     });
   });
@@ -406,11 +410,13 @@ function getCookie() {
   return cookie;
 }
 
-function Game() {
+function Game(props) {
+  const { id } = props;
   const [positions, setPositions] = useState([]);
   const [crowds, setCrowds] = useState([]);
   const [availableBets, setAvailableBets] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [status, setStatus] = useState([]);
   const [_gameState, _setGameState] = useState({});
 
   const setGameState = (gameState) => {
@@ -419,10 +425,11 @@ function Game() {
     setCrowds(getCrowds(gameState));
     setAvailableBets(getAvailableBets(gameState));
     setPlayers(getPlayers(gameState));
+    setStatus(gameState.status)
     _setGameState(gameState);
   };
   const [socket, setSocket] = useState(() => {
-    return makeSocket(setGameState);
+    return makeSocket(id, setGameState);
   });
 
   socket.on("game_state", (gameState) => {});
@@ -459,6 +466,15 @@ function Game() {
     emitEvent("placeDesertTile", { desertTileIndex, desertTileSide });
   };
 
+  const startGame = () => {
+    socket.emit("start_game", { gameId: id });
+  }
+
+  const changeName = () => {
+    console.log('not implemented')
+  }
+
+
   const roll = () => {
     emitEvent("rollDice", {});
   };
@@ -485,8 +501,12 @@ function Game() {
   const playersStyle = {
     marginLeft: "30px",
   };
+  const startButtonStyle = {
+    marginTop: '30px',
+  }
   return (
     <div style={containerStyle}>
+      { status === "inprogress" &&
       <div>
         <h3>Track</h3>
         <Track positions={positions} crowds={crowds} placeCrowd={placeCrowd} />
@@ -505,23 +525,34 @@ function Game() {
         <h3>Rolls</h3>
         <Dice rolled={rolled} onRoll={roll} />
       </div>
+      }
       <div style={playersStyle}>
         <h2>Players</h2>
         <div id="players">
           {players.map((p, i) => (
-            <Player number={i + 1} player={p} active={isActive(i)} />
+            <Player number={i + 1} player={p} active={isActive(i)} editable={status === "init"} changeName={changeName}/>
           ))}
         </div>
+        { status === "init" &&
+        <button style={startButtonStyle} onClick={startGame}>Start game</button>
+      }
       </div>
     </div>
   );
 }
 
+function MakeGame() {
+  useEffect(() => {
+    const gameId = uuidv4();
+    window.location.search = `?game=${gameId}`;
+  })
+  return "Creating game..."
+}
+
 function App() {
   const currentGame = new URL(window.location.href).searchParams.get("game");
   if (!currentGame) {
-    // return start game screen
-    return "not implemented";
+    return <MakeGame />
   } else {
     return <Game id={currentGame} />;
   }

@@ -10,6 +10,7 @@ import {
 } from "./reducer.js";
 
 const httpServer = createServer();
+
 const io = new Server(httpServer, {
   cors: {
     origin: "http://localhost:3000",
@@ -17,69 +18,86 @@ const io = new Server(httpServer, {
   },
 });
 
-const gameState = getInitialGameState();
-const gameObservers = {};
-const cookies = {};
-const registerGameObserver = (callback) => {
+const games = {};
+const gameObservers = {}; // id to game id
+
+const registerGameObserver = (gameId, callback) => {
   const id = uuidv4();
-  gameObservers[id] = { callback };
+  if (!games[gameId]) {
+    games[gameId] = {
+      state: getInitialGameState(),
+      observers: [],
+      cookies: [],
+    };
+  }
+  games[gameId].observers[id] = { callback };
+  gameObservers[id] = gameId;
   return id;
 };
-const issueUpdate = () => {
-  for (const o of Object.values(gameObservers)) {
-    const players = (o.cookie && cookies[o.cookie].players) || [];
-    o.callback(redactGameState(gameState, players));
+const issueUpdate = (gameId) => {
+  for (const o of Object.values(games[gameId].observers)) {
+    const players = (o.cookie && games[gameId].cookies[o.cookie].players) || [];
+    o.callback(redactGameState(games[gameId].state, players));
   }
 };
 
-const registerCookie = (id, cookie) => {
+const registerCookie = (observerId, cookie) => {
   console.log("registering cookie");
+  const gameId = gameObservers[observerId];
+  const game = games[gameId];
+  const cookies = game.cookies;
   if (!(cookie in cookies)) {
     console.log("making new player");
-    const player = makeNewPlayer(gameState);
+    const player = makeNewPlayer(game.state);
     cookies[cookie] = { players: [player] };
   }
-  gameObservers[id].cookie = cookie;
-  issueUpdate();
+  game.observers[observerId].cookie = cookie;
+  issueUpdate(gameId);
 };
-const start = () => {
-  startGame(gameState);
-  issueUpdate();
+
+const start = (gameId) => {
+  console.log(`starting game ${gameId}!`);
+  startGame(games[gameId].state);
+  issueUpdate(gameId);
 };
-const processEvent = (event) => {
-  console.log(`processing`, event, gameState);
-  reduceEvent(gameState, event);
-  issueUpdate();
+
+const processEvent = (observerId, event) => {
+  console.log(`processing`, event);
+  const gameId = gameObservers[observerId];
+  const game = games[gameId];
+  reduceEvent(game.state, event);
+  issueUpdate(gameId);
 };
 
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
 
-  let id = registerGameObserver((newState) => {
-    socket.emit("game_state", newState);
+  socket.on("join", ({ gameId, cookie }) => {
+    let observerId = registerGameObserver(gameId, (newState) => {
+      socket.emit("game_state", newState);
+    });
+
+    registerCookie(observerId, cookie);
+
+    console.log(`got id ${gameId}`);
+
+    socket.on("start_game", ({ gameId }) => {
+      start(gameId);
+    });
+
+    socket.on("event", (event) => {
+      console.log("got event ", event);
+      try {
+        processEvent(observerId, event);
+      } catch (e) {
+        console.log(e);
+      }
+
+      console.log("new game state");
+    });
+
+    socket.emit("game_state", games[gameId].state);
   });
-
-  socket.on("start_game", () => {
-    start();
-  });
-
-  socket.on("register_cookie", ({ cookie }) => {
-    console.log("register cookie ", cookie);
-    registerCookie(id, cookie);
-  });
-
-  socket.on("event", (event) => {
-    console.log("got event ", event);
-    try {
-      processEvent(event);
-    } catch (e) {
-      console.log(e);
-    }
-
-    console.log("new game state");
-  });
-
-  socket.emit("game_state", gameState);
 });
 
 httpServer.listen(3030);

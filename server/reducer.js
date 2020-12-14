@@ -194,7 +194,6 @@ function makeLegBet(gameState, event) {
 }
 
 export function getPlayerExistingRaceBets(gameState, player) {
-  console.log("gper", gameState);
   var longRaceBets = [];
   for (const o of gameState["longRaceBets"]) {
     if (o.player == player) {
