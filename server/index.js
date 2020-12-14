@@ -38,8 +38,22 @@ const registerGameObserver = (gameId, callback) => {
 const issueUpdate = (gameId) => {
   for (const o of Object.values(games[gameId].observers)) {
     const players = (o.cookie && games[gameId].cookies[o.cookie].players) || [];
-    o.callback(redactGameState(games[gameId].state, players));
+    o.callback({
+      type: "game_state",
+      data: redactGameState(games[gameId].state, players),
+    });
   }
+};
+
+const issuePlayerUpdate = (observerId) => {
+  const gameId = gameObservers[observerId];
+  const game = games[gameId];
+  const observer = game.observers[observerId];
+  const cookie = game.cookies[observer.cookie];
+  observer.callback({
+    type: "player_assignment",
+    data: { players: cookie.players },
+  });
 };
 
 const registerCookie = (observerId, cookie) => {
@@ -48,11 +62,11 @@ const registerCookie = (observerId, cookie) => {
   const game = games[gameId];
   const cookies = game.cookies;
   if (!(cookie in cookies)) {
-    console.log("making new player");
     const player = makeNewPlayer(game.state);
     cookies[cookie] = { players: [player] };
   }
   game.observers[observerId].cookie = cookie;
+  issuePlayerUpdate(observerId);
   issueUpdate(gameId);
 };
 
@@ -80,20 +94,17 @@ io.on("connection", (socket) => {
   console.log("connection", socket.id);
 
   socket.on("join", ({ gameId, cookie }) => {
-    let observerId = registerGameObserver(gameId, (newState) => {
-      socket.emit("game_state", newState);
+    let observerId = registerGameObserver(gameId, (observerEvent) => {
+      socket.emit(observerEvent.type, observerEvent.data);
     });
 
     registerCookie(observerId, cookie);
-
-    console.log(`got id ${gameId}`);
 
     socket.on("start_game", ({ gameId }) => {
       start(gameId);
     });
 
     socket.on("change_name", ({ player, displayName }) => {
-      // (observerId, player, displayName) => {
       changeName(observerId, player, displayName);
     });
 
