@@ -242,7 +242,7 @@ function Modal(props) {
 }
 
 function Player(props) {
-  const { number, player, active } = props;
+  const { number, player, active, editable, changeName } = props;
   const renderedBets = player.bets.map((b) => (
     <Bet camel={b.camel} bet={b.payout} />
   ));
@@ -253,9 +253,36 @@ function Player(props) {
   if (active) {
     playerStyle.border = "1px solid black";
   }
+  let [name, setName] = useState(player.name);
+  let [timeoutId, setTimeoutId] = useState();
+  let [pendingUpdate, setPendingUpdate] = useState(false);
+  const handleNameChange = (e) => {
+    setPendingUpdate(true);
+    const name = e.target.value;
+    console.log("name:", name);
+    setName(name);
+    if (timeoutId) clearTimeout(timeoutId);
+    setTimeoutId(
+      setTimeout(() => {
+        changeName(number, name);
+        pendingUpdate = false;
+      }, 1000)
+    );
+  };
+  const nameComponent = editable ? (
+    <form>
+      <input
+        type="text"
+        value={pendingUpdate ? name : player.name}
+        onChange={handleNameChange}
+      ></input>
+    </form>
+  ) : (
+    player.name
+  );
   return (
     <div style={playerStyle}>
-      <h3>{player.name}</h3>
+      <h3>{nameComponent}</h3>
       <div>{player.money}</div>
       <table class="player-bets">
         <tr>{renderedBets}</tr>
@@ -380,7 +407,7 @@ function getPlayers(gameState) {
     if (gameState.finalScore) {
       money = gameState.finalScore[n] || 0;
     }
-    return { name: n, money, bets };
+    return { name: p.displayName, money, bets };
   });
 }
 
@@ -425,7 +452,7 @@ function Game(props) {
     setCrowds(getCrowds(gameState));
     setAvailableBets(getAvailableBets(gameState));
     setPlayers(getPlayers(gameState));
-    setStatus(gameState.status)
+    setStatus(gameState.status);
     _setGameState(gameState);
   };
   const [socket, setSocket] = useState(() => {
@@ -468,12 +495,11 @@ function Game(props) {
 
   const startGame = () => {
     socket.emit("start_game", { gameId: id });
-  }
+  };
 
-  const changeName = () => {
-    console.log('not implemented')
-  }
-
+  const changeName = (player, displayName) => {
+    socket.emit("change_name", { player, displayName });
+  };
 
   const roll = () => {
     emitEvent("rollDice", {});
@@ -502,40 +528,52 @@ function Game(props) {
     marginLeft: "30px",
   };
   const startButtonStyle = {
-    marginTop: '30px',
-  }
+    marginTop: "30px",
+  };
   return (
     <div style={containerStyle}>
-      { status === "inprogress" &&
-      <div>
-        <h3>Track</h3>
-        <Track positions={positions} crowds={crowds} placeCrowd={placeCrowd} />
+      {status === "inprogress" && (
+        <div>
+          <h3>Track</h3>
+          <Track
+            positions={positions}
+            crowds={crowds}
+            placeCrowd={placeCrowd}
+          />
 
-        <h3>Bets</h3>
-        <Bets available={availableBets} onPlace={placeBet} />
+          <h3>Bets</h3>
+          <Bets available={availableBets} onPlace={placeBet} />
 
-        <h3>Long Bets</h3>
-        <LongBets
-          toLose={longBets.toLose}
-          toWin={longBets.toWin}
-          available={[1, 2, 4]}
-          onPlace={placeLongBet}
-        />
+          <h3>Long Bets</h3>
+          <LongBets
+            toLose={longBets.toLose}
+            toWin={longBets.toWin}
+            available={[1, 2, 4]}
+            onPlace={placeLongBet}
+          />
 
-        <h3>Rolls</h3>
-        <Dice rolled={rolled} onRoll={roll} />
-      </div>
-      }
+          <h3>Rolls</h3>
+          <Dice rolled={rolled} onRoll={roll} />
+        </div>
+      )}
       <div style={playersStyle}>
         <h2>Players</h2>
         <div id="players">
           {players.map((p, i) => (
-            <Player number={i + 1} player={p} active={isActive(i)} editable={status === "init"} changeName={changeName}/>
+            <Player
+              number={i + 1}
+              player={p}
+              active={isActive(i)}
+              editable={status === "init"}
+              changeName={changeName}
+            />
           ))}
         </div>
-        { status === "init" &&
-        <button style={startButtonStyle} onClick={startGame}>Start game</button>
-      }
+        {status === "init" && (
+          <button style={startButtonStyle} onClick={startGame}>
+            Start game
+          </button>
+        )}
       </div>
     </div>
   );
@@ -545,14 +583,14 @@ function MakeGame() {
   useEffect(() => {
     const gameId = uuidv4();
     window.location.search = `?game=${gameId}`;
-  })
-  return "Creating game..."
+  });
+  return "Creating game...";
 }
 
 function App() {
   const currentGame = new URL(window.location.href).searchParams.get("game");
   if (!currentGame) {
-    return <MakeGame />
+    return <MakeGame />;
   } else {
     return <Game id={currentGame} />;
   }

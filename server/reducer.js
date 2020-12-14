@@ -1,11 +1,6 @@
 import _ from "lodash";
 import util from "util";
 
-// todo list
-// multiple concurrent games
-// store + update user-chosen name
-// show the final score when game ends
-
 export function makeNewPlayer(gameState) {
   if (gameState.status !== "init") {
     console.log(
@@ -16,6 +11,7 @@ export function makeNewPlayer(gameState) {
 
   gameState.numberPlayers += 1;
   const newPlayer = _.cloneDeep(initialPlayerState);
+  newPlayer.displayName = `Player ${gameState.numberPlayers}`;
   gameState.players[gameState.numberPlayers.toString()] = newPlayer;
 
   return gameState.numberPlayers.toString();
@@ -596,6 +592,10 @@ function newLeg(gameState) {
   }
 }
 
+export function updateDisplayName(gameState, player, displayName) {
+  gameState.players[player].displayName = displayName;
+}
+
 var initialPlayerLegState = {
   legBets: {
     red: [],
@@ -611,7 +611,7 @@ var initialPlayerLegState = {
 };
 
 var initialPlayerState = {
-  screenName: "",
+  displayName: "",
   legs: {
     0: _.cloneDeep(initialPlayerLegState),
   },

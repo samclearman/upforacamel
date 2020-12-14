@@ -7,6 +7,7 @@ import {
   startGame,
   reduceEvent,
   redactGameState,
+  updateDisplayName,
 } from "./reducer.js";
 
 const httpServer = createServer();
@@ -62,10 +63,16 @@ const start = (gameId) => {
 };
 
 const processEvent = (observerId, event) => {
-  console.log(`processing`, event);
   const gameId = gameObservers[observerId];
   const game = games[gameId];
   reduceEvent(game.state, event);
+  issueUpdate(gameId);
+};
+
+const changeName = (observerId, player, displayName) => {
+  const gameId = gameObservers[observerId];
+  const game = games[gameId];
+  updateDisplayName(game.state, player, displayName);
   issueUpdate(gameId);
 };
 
@@ -83,6 +90,11 @@ io.on("connection", (socket) => {
 
     socket.on("start_game", ({ gameId }) => {
       start(gameId);
+    });
+
+    socket.on("change_name", ({ player, displayName }) => {
+      // (observerId, player, displayName) => {
+      changeName(observerId, player, displayName);
     });
 
     socket.on("event", (event) => {

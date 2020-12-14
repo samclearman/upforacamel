@@ -1,28 +1,28 @@
 tr {
-    display: flex;
+  display: flex;
 }
 
 td {
-    width: 30px;
-    border: 1px solid black;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  width: 30px;
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .crowds td {
-    height: 30px;
+  height: 30px;
 }
 
 .crowds div {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 tr.camels {
-    background-color: beige;
+  background-color: beige;
 }
 
 .camels td {
-    height: 110px;
-    flex-direction: column-reverse;
+  height: 110px;
+  flex-direction: column-reverse;
 }
