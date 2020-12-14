@@ -3,7 +3,7 @@ import {
   makeNewPlayer,
   startGame,
   reduceEvent,
-  getPlayerExistingRaceBets
+  getPlayerExistingRaceBets,
 } from "./reducer.js";
 import util from "util";
 
@@ -112,9 +112,9 @@ var exampleEvents = [
     type: "makeRaceBet",
     player: "1",
     data: {
-      "color": "red",
-      "kind": "long",
-    }
+      color: "red",
+      kind: "long",
+    },
   },
   {
     type: "placeDesertTile",
@@ -151,17 +151,17 @@ var exampleEvents = [
 ];
 
 var gameState = getInitialGameState();
-makeNewPlayer(gameState, "hi1")
-makeNewPlayer(gameState, "hi2")
-makeNewPlayer(gameState, "hi3")
-makeNewPlayer(gameState, "hi4")
-makeNewPlayer(gameState, "hi5")
-makeNewPlayer(gameState, "hi6")
-startGame(gameState)
+makeNewPlayer(gameState, "hi1");
+makeNewPlayer(gameState, "hi2");
+makeNewPlayer(gameState, "hi3");
+makeNewPlayer(gameState, "hi4");
+makeNewPlayer(gameState, "hi5");
+makeNewPlayer(gameState, "hi6");
+startGame(gameState);
 for (var i = 0; i < exampleEvents.length; i++) {
-    reduceEvent(gameState, exampleEvents[i])
-    if (exampleEvents[i].type === "makeRaceBet") {
-      getPlayerExistingRaceBets(gameState, exampleEvents[i].player)
-    }
-    console.log(util.inspect(gameState, {showHidden: false, depth: null}))
+  reduceEvent(gameState, exampleEvents[i]);
+  if (exampleEvents[i].type === "makeRaceBet") {
+    getPlayerExistingRaceBets(gameState, exampleEvents[i].player);
+  }
+  console.log(util.inspect(gameState, { showHidden: false, depth: null }));
 }

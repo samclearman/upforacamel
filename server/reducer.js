@@ -16,16 +16,18 @@ export function makeNewPlayer(gameState) {
 
 export function startGame(gameState) {
   // start the game!
-  var dice = _.cloneDeep(colorCamels).concat(_.cloneDeep(bwCamels))
-  var track = gameState.track
+  var dice = _.cloneDeep(colorCamels).concat(_.cloneDeep(bwCamels));
+  var track = gameState.track;
   while (dice.length > 0) {
     var color = _.sample(dice);
     var number = _.sample([1, 2, 3]);
-    dice = _.filter(dice, (o) => { return o !== color });
+    dice = _.filter(dice, (o) => {
+      return o !== color;
+    });
     if (colorCamels.includes(color)) {
-      track[number - 1]["camels"].push(color)
+      track[number - 1]["camels"].push(color);
     } else {
-      track[16 - number]["camels"].push(color)
+      track[16 - number]["camels"].push(color);
     }
   }
   gameState.started = true;
@@ -650,14 +652,8 @@ var initialGameState = {
     11: _.cloneDeep(initialTrackState),
     12: _.cloneDeep(initialTrackState),
     13: _.cloneDeep(initialTrackState),
-    14: {
-      camels: ["black"],
-      tiles: [],
-    },
-    15: {
-      camels: ["white"],
-      tiles: [],
-    },
+    14: _.cloneDeep(initialTrackState),
+    15: _.cloneDeep(initialTrackState),
   },
   events: [],
 };

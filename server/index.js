@@ -31,6 +31,7 @@ const issueUpdate = () => {
     o.callback(redactGameState(gameState, players));
   }
 };
+
 const registerCookie = (id, cookie) => {
   console.log("registering cookie");
   if (!(cookie in cookies)) {
@@ -42,7 +43,7 @@ const registerCookie = (id, cookie) => {
   issueUpdate();
 };
 const start = () => {
-  startGame();
+  startGame(gameState);
   issueUpdate();
 };
 const processEvent = (event) => {
