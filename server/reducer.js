@@ -456,9 +456,9 @@ function scoreGame(gameState, camelsToMove) {
 
   // sum up leg scores
   var scores = {};
-  for (var i = 0; i < gameState.numberPlayers; i++) {
+  for (var i = 1; i <= gameState.numberPlayers; i++) {
     var playerLegScore = 0;
-    var currentPlayer = gameState["players"][i + 1];
+    var currentPlayer = gameState["players"][i];
     console.log("scoring, currentPlayerState", currentPlayer);
     for (var j = 0; j <= gameState.currentLegNum; j++) {
       playerLegScore += currentPlayer["legs"][j]["score"];
