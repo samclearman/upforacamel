@@ -190,7 +190,6 @@ function makeLegBet(gameState, event) {
 }
 
 export function getPlayerExistingRaceBets(gameState, player) {
-  console.log(gameState.longRaceBets);
   var longRaceBets = [];
   for (const o of gameState["longRaceBets"]) {
     if (o.player == player) {
@@ -675,7 +674,6 @@ export function getInitialGameState() {
 }
 
 export function redactGameState(gameState, players) {
-  console.log(`redacting for ${players}`);
   const redacted = _.cloneDeep(gameState);
   for (const player of players) {
     redacted.players[player].raceBets = getPlayerExistingRaceBets(
@@ -686,6 +684,5 @@ export function redactGameState(gameState, players) {
   for (const k of ["longRaceBets", "shortRaceBets"]) {
     redacted[k] = redacted[k].map((b) => ({ ...b, color: null }));
   }
-  console.log(redacted);
   return redacted;
 }

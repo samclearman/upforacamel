@@ -201,7 +201,7 @@ function Die(props) {
     backgroundColor: camelToColor(parseInt(camel)),
   };
 
-  return <td style={dieStyle}>{roll}</td>;
+  return <td style={dieStyle}>{roll || <>&nbsp;</>}</td>;
 }
 
 function Dice(props) {
@@ -210,7 +210,7 @@ function Dice(props) {
     <Die camel={camel} roll={roll} />
   ));
   return (
-    <table class="rolled-dice" onClick={onRoll}>
+    <table onClick={onRoll}>
       <tr>{renderedDice}</tr>
     </table>
   );
@@ -259,7 +259,6 @@ function Player(props) {
   const handleNameChange = (e) => {
     setPendingUpdate(true);
     const name = e.target.value;
-    console.log("name:", name);
     setName(name);
     if (timeoutId) clearTimeout(timeoutId);
     setTimeoutId(
@@ -419,13 +418,10 @@ function getLongBets(gameState) {
 }
 
 function getAvailableLongBets(gameState, player) {
-  console.log(player);
-  console.log(gameState.players);
   const placed = [].concat(
     gameState.players[player]?.raceBets?.longRaceBets || [],
     gameState.players[player]?.raceBets?.shortRaceBets || []
   );
-  console.log(placed);
   return [1, 2, 3, 4, 5].filter((n) => !placed.includes(camelToColor(n)));
 }
 
@@ -447,6 +443,25 @@ function getPlayers(gameState) {
     }
     return { name: p.displayName, money, bets };
   });
+}
+
+function getRolls(gameState) {
+  const rolled = {
+    1: null,
+    2: null,
+    3: null,
+    4: null,
+    5: null,
+    "-1": null,
+    "-2": null,
+  };
+  if (!gameState) {
+    return rolled;
+  }
+  for (const die of getCurrentLeg(gameState).rolledDice) {
+    rolled[camelToNumber(die.color)] = die.number;
+  }
+  return rolled;
 }
 
 function makeSocket(gameId, handleEvent) {
@@ -481,11 +496,9 @@ function Game(props) {
   const [_gameState, _setGameState] = useState(null);
 
   const setGameState = (gameState) => {
-    console.log(gameState);
     _setGameState(gameState);
   };
   const handleEvent = (type, event) => {
-    console.log("handling", type, event);
     switch (type) {
       case "game_state":
         setGameState(event);
@@ -500,9 +513,7 @@ function Game(props) {
   });
 
   const emitEvent = (type, data) => {
-    console.log("emitting", type, data);
     if (!_gameState?.currentPlayer) {
-      console.log("no current player");
       return;
     }
     socket.emit("event", {
@@ -544,17 +555,6 @@ function Game(props) {
     emitEvent("rollDice", {});
   };
 
-  const rolled = {
-    1: null,
-    2: 1,
-    3: null,
-    4: null,
-    5: 3,
-    "-1": 2,
-    "-2": null,
-  };
-
-  console.log("rendering w", currentPlayer);
   const status = _gameState?.status || "disconnected";
   const containerStyle = {
     display: "flex",
@@ -589,7 +589,7 @@ function Game(props) {
           />
 
           <h3>Rolls</h3>
-          <Dice rolled={rolled} onRoll={roll} />
+          <Dice rolled={getRolls(_gameState)} onRoll={roll} />
         </div>
       )}
       <div style={playersStyle}>
