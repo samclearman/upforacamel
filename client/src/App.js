@@ -358,12 +358,18 @@ function tileToNumber(tileSymbol) {
 }
 
 function getPositions(gameState) {
+  if (!gameState) {
+    return [];
+  }
   return Object.values(gameState.track).map((v) =>
     v.camels.map((c) => camelToNumber(c))
   );
 }
 
 function getCrowds(gameState) {
+  if (!gameState) {
+    return [];
+  }
   return Object.values(gameState.track).map((v) =>
     v.tiles.length
       ? {
@@ -385,16 +391,48 @@ function getCrowds(gameState) {
   // }
   // return crowds;
 }
+function getCurrentLeg(gameState) {
+  return gameState.legs[gameState.currentLegNum];
+}
 
 function getAvailableBets(gameState) {
+  if (!gameState) {
+    return [];
+  }
   const bets = [];
-  for (const c in gameState.remainingLegBets) {
-    bets[camelToNumber(c) - 1] = gameState.remainingLegBets[c].slice(-1)[0];
+  for (const c in getCurrentLeg(gameState).remainingLegBets) {
+    bets[camelToNumber(c) - 1] = getCurrentLeg(gameState).remainingLegBets[
+      c
+    ].slice(-1)[0];
   }
   return bets;
 }
 
+function getLongBets(gameState) {
+  if (!gameState) {
+    return { toLose: [], toWin: [] };
+  }
+  return {
+    toLose: gameState.shortRaceBets.map((b) => parseInt(b.player)),
+    toWin: gameState.longRaceBets.map((b) => parseInt(b.player)),
+  };
+}
+
+function getAvailableLongBets(gameState, player) {
+  console.log(player);
+  console.log(gameState.players);
+  const placed = [].concat(
+    gameState.players[player]?.raceBets?.longRaceBets || [],
+    gameState.players[player]?.raceBets?.shortRaceBets || []
+  );
+  console.log(placed);
+  return [1, 2, 3, 4, 5].filter((n) => !placed.includes(camelToColor(n)));
+}
+
 function getPlayers(gameState) {
+  if (!gameState) {
+    return [];
+  }
   return Object.entries(gameState.players).map(([n, p]) => {
     const lastLeg = Object.values(p.legs).slice(-1)[0];
     const bets = [];
@@ -439,21 +477,11 @@ function getCookie() {
 
 function Game(props) {
   const { id } = props;
-  const [positions, setPositions] = useState([]);
-  const [crowds, setCrowds] = useState([]);
-  const [availableBets, setAvailableBets] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [status, setStatus] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState("noplayer");
-  const [_gameState, _setGameState] = useState({});
+  const [_gameState, _setGameState] = useState(null);
 
   const setGameState = (gameState) => {
     console.log(gameState);
-    setPositions(getPositions(gameState));
-    setCrowds(getCrowds(gameState));
-    setAvailableBets(getAvailableBets(gameState));
-    setPlayers(getPlayers(gameState));
-    setStatus(gameState.status);
     _setGameState(gameState);
   };
   const handleEvent = (type, event) => {
@@ -472,7 +500,8 @@ function Game(props) {
   });
 
   const emitEvent = (type, data) => {
-    if (!_gameState.currentPlayer) {
+    console.log("emitting", type, data);
+    if (!_gameState?.currentPlayer) {
       console.log("no current player");
       return;
     }
@@ -484,7 +513,7 @@ function Game(props) {
   };
 
   const isActive = (player) => {
-    return _gameState.currentPlayer === (player + 1).toString();
+    return _gameState?.currentPlayer === (player + 1).toString();
   };
 
   const placeBet = (camel) => {
@@ -494,7 +523,7 @@ function Game(props) {
   const placeLongBet = (bet, camel) => {
     const kind = bet === "toWin" ? "long" : "short";
     const color = camelToColor(camel);
-    emitEvent("makeRaceBet", { kind, camel });
+    emitEvent("makeRaceBet", { kind, color });
   };
 
   const placeCrowd = (position, direction) => {
@@ -515,11 +544,6 @@ function Game(props) {
     emitEvent("rollDice", {});
   };
 
-  const longBets = {
-    toLose: [1, 4, 1],
-    toWin: [5, 3, 2, 2, 5],
-  };
-
   const rolled = {
     1: null,
     2: 1,
@@ -530,6 +554,8 @@ function Game(props) {
     "-2": null,
   };
 
+  console.log("rendering w", currentPlayer);
+  const status = _gameState?.status || "disconnected";
   const containerStyle = {
     display: "flex",
     justifyContent: "center",
@@ -546,19 +572,19 @@ function Game(props) {
         <div>
           <h3>Track</h3>
           <Track
-            positions={positions}
-            crowds={crowds}
+            positions={getPositions(_gameState)}
+            crowds={getCrowds(_gameState)}
             placeCrowd={placeCrowd}
           />
 
           <h3>Bets</h3>
-          <Bets available={availableBets} onPlace={placeBet} />
+          <Bets available={getAvailableBets(_gameState)} onPlace={placeBet} />
 
-          <h3>Long Bets</h3>
+          <h3>Race Bets</h3>
           <LongBets
-            toLose={longBets.toLose}
-            toWin={longBets.toWin}
-            available={[1, 2, 4]}
+            toLose={getLongBets(_gameState).toLose}
+            toWin={getLongBets(_gameState).toWin}
+            available={getAvailableLongBets(_gameState, currentPlayer)}
             onPlace={placeLongBet}
           />
 
@@ -569,7 +595,7 @@ function Game(props) {
       <div style={playersStyle}>
         <h2>Players</h2>
         <div id="players">
-          {players.map((p, i) => (
+          {getPlayers(_gameState).map((p, i) => (
             <Player
               number={i + 1}
               player={p}
