@@ -478,7 +478,7 @@ function getRolls(gameState) {
 }
 
 function makeSocket(gameId, handleEvent) {
-  const socket = io("http://localhost:3030");
+  const socket = io();
   socket.on("connect", () => {
     const cookie = getCookie();
     socket.emit("join", {
