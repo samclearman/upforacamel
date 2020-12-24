@@ -248,7 +248,7 @@ function placeDesertTile(gameState, event) {
   track[desertTileIndex]["tiles"] = [isOasis ? "+" : "-"];
   gameState["players"][currentPlayer]["legs"][currentLegNum][
     "desertTile"
-  ] = desertTileIndex;
+  ] = isOasis ? desertTileIndex: -1 * desertTileIndex;
 }
 
 var colorCamels = ["red", "blue", "purple", "yellow", "green"];

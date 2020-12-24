@@ -42,7 +42,7 @@ var exampleEvents = [
     player: "2",
     data: {
       desertTileIndex: 3,
-      desertTileSide: "oasis",
+      desertTileSide: "mirage",
     },
   },
   {
@@ -82,7 +82,7 @@ var exampleEvents = [
     player: "2",
     data: {
       desertTileIndex: 3,
-      desertTileSide: "mirage",
+      desertTileSide: "oasis",
     },
   },
   {
