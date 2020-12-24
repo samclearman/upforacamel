@@ -1,5 +1,6 @@
-import { createServer } from "http";
-import { Server } from "socket.io";
+import { Server } from "http";
+import express from "express";
+import { Server as SocketServer } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import {
   getInitialGameState,
@@ -10,13 +11,15 @@ import {
   updateDisplayName,
 } from "./reducer.js";
 
-const httpServer = createServer();
+const app = express();
+app.use(express.static("build"));
 
-const io = new Server(httpServer, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-  },
+const server = Server(app);
+const io = new SocketServer(server, {
+  // cors: {
+  //   origin: "http://localhost:3000",
+  //   methods: ["GET", "POST"],
+  // },
 });
 
 const games = {};
@@ -123,4 +126,4 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3030);
+server.listen(3000);
