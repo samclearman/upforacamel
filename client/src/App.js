@@ -24,19 +24,20 @@ function Crowd(props) {
   const [renderModal, showModal] = useModal();
   const { player, direction } = crowd || {};
   const glyph = direction > 0 ? "→" : "←";
+  const style = {
+    backgroundColor: playerNumberToColor(player),
+  };
   const renderedCrowd = crowd ? <div>{glyph}</div> : <div></div>;
+  const chooserStyle = { backgroundColor: "white" };
   return (
-    <td onClick={showModal}>
+    <td style={style} onClick={showModal}>
       {renderModal(
         <table>
           <tr>
-            <td
-              style={{ backgroundColor: "white" }}
-              onClick={() => onPlace(-1)}
-            >
+            <td style={chooserStyle} onClick={() => onPlace(-1)}>
               {"←"}
             </td>
-            <td style={{ backgroundColor: "white" }} onClick={() => onPlace(1)}>
+            <td style={chooserStyle} onClick={() => onPlace(1)}>
               {"→"}
             </td>
           </tr>
@@ -479,6 +480,7 @@ function getRolls(gameState) {
 
 function makeSocket(gameId, handleEvent) {
   const socket = io();
+  // const socket = io("http://localhost:8080");
   socket.on("connect", () => {
     const cookie = getCookie();
     socket.emit("join", {

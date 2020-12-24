@@ -15,7 +15,15 @@ const app = express();
 app.use(express.static("static"));
 
 const server = Server(app);
-const io = new SocketServer(server);
+const io = new SocketServer(
+  server
+  // {
+  //   cors: {
+  //     origin: "http://localhost:3000",
+  //     methods: ["GET", "POST"],
+  //   },
+  // }
+);
 
 const games = {};
 const gameObservers = {}; // id to game id
