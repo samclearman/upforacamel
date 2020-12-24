@@ -15,12 +15,7 @@ const app = express();
 app.use(express.static("static"));
 
 const server = Server(app);
-const io = new SocketServer(server, {
-  // cors: {
-  //   origin: "http://localhost:3000",
-  //   methods: ["GET", "POST"],
-  // },
-});
+const io = new SocketServer(server);
 
 const games = {};
 const gameObservers = {}; // id to game id
@@ -82,6 +77,12 @@ const start = (gameId) => {
 const processEvent = (observerId, event) => {
   const gameId = gameObservers[observerId];
   const game = games[gameId];
+  const cookie = game.observers[observerId].cookie;
+  const coookie = game.cookies[cookie];
+  if (event.player && !(coookie && coookie.players.includes(event.player))) {
+    throw new Error("You arent that player you dirty dog");
+  }
+
   reduceEvent(game.state, event);
   issueUpdate(gameId);
 };

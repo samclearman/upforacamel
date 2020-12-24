@@ -676,6 +676,9 @@ export function getInitialGameState() {
 export function redactGameState(gameState, players) {
   const redacted = _.cloneDeep(gameState);
   for (const player of players) {
+    if (!redacted.players[player]) {
+      continue;
+    }
     redacted.players[player].raceBets = getPlayerExistingRaceBets(
       gameState,
       player
