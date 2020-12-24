@@ -53,8 +53,11 @@ function Track(props) {
   const renderedCrowds = crowds.map((c, i) => (
     <Crowd crowd={c} onPlace={(direction) => placeCrowd(i, direction)} />
   ));
+  const trackStyle = {
+    maxWidth: "100%",
+  };
   return (
-    <table>
+    <table style={trackStyle}>
       <tr class="camels">{renderedTiles}</tr>
       <tr class="crowds">{renderedCrowds}</tr>
     </table>
@@ -279,10 +282,18 @@ function Player(props) {
   ) : (
     player.name
   );
+  const moneyStyle = {
+    fontWeight: "normal",
+    display: "inline",
+    marginLeft: "10px",
+  };
   return (
     <div style={playerStyle}>
-      <h3>{nameComponent}</h3>
-      <div>{player.money}</div>
+      <h3>
+        {nameComponent}
+        <div style={moneyStyle}>💰{player.money}</div>
+      </h3>
+
       <table class="player-bets">
         <tr>{renderedBets}</tr>
       </table>
@@ -437,7 +448,9 @@ function getPlayers(gameState) {
         bets.push({ camel: camelToNumber(c), payout });
       }
     }
-    let money = 0;
+    let money = Object.values(p.legs)
+      .map((leg) => leg.score || 0)
+      .reduce((x, y) => x + y);
     if (gameState.finalScore) {
       money = gameState.finalScore[n] || 0;
     }
@@ -558,6 +571,8 @@ function Game(props) {
   const status = _gameState?.status || "disconnected";
   const containerStyle = {
     display: "flex",
+    flexWrap: "wrap",
+    maxWidth: "100%",
     justifyContent: "center",
   };
   const playersStyle = {

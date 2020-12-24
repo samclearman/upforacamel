@@ -25,4 +25,9 @@ tr.camels {
 .camels td {
   height: 110px;
   flex-direction: column-reverse;
+  max-width: 5vw;
+}
+
+.crowds td {
+  max-width: 5vw;
 }
