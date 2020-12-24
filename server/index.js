@@ -12,7 +12,7 @@ import {
 } from "./reducer.js";
 
 const app = express();
-app.use(express.static("build"));
+app.use(express.static("static"));
 
 const server = Server(app);
 const io = new SocketServer(server, {
