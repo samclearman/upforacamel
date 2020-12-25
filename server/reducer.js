@@ -454,7 +454,7 @@ function scoreGame(gameState, camelsToMove) {
   for (var i = 1; i <= gameState.numberPlayers; i++) {
     var playerLegScore = 0;
     var currentPlayer = gameState["players"][i];
-    console.log("scoring, currentPlayerState", currentPlayer);
+
     for (var j = 0; j <= gameState.currentLegNum; j++) {
       playerLegScore += currentPlayer["legs"][j]["score"];
     }
@@ -462,7 +462,8 @@ function scoreGame(gameState, camelsToMove) {
   }
 
   var payoffs = [8, 5, 3, 2]; // everyone gets at least 1
-  for (o in gameState.longRaceBets) {
+  for (var key in gameState.longRaceBets) {
+    var o = gameState.longRaceBets[key]
     if (o.color == winnerCamel) {
       scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1;
     } else {
@@ -471,17 +472,16 @@ function scoreGame(gameState, camelsToMove) {
   }
 
   payoffs = [8, 5, 3, 2]; // everyone gets at least 1
-  for (o in gameState.shortRaceBets) {
+  for (var key in gameState.shortRaceBets) {
+    var o = gameState.shortRaceBets[key]
     if (o.color == loserCamel) {
       scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1;
     } else {
       scores[o.player] -= 1;
     }
   }
-  console.log("SAVING SCORES");
   gameState.finalScore = scores;
   gameState.status = "ended";
-  // throw new Error(`Game over with scores ${scores}`);
 }
 
 function updatePlayerScoreDesertTile(gameState, camelPosition) {
@@ -535,9 +535,9 @@ function getLoserCamel(gameState) {
 
 function scoreLeg(gameState, winnerCamel, runnerUpCamel) {
   const currentLegNum = gameState.currentLegNum;
-  for (var i = 0; i < gameState.numberPlayers; i++) {
+  for (var i = 1; i <= gameState.numberPlayers; i++) {
     var maxPartnerPayoff = 0;
-    var playerPosition = gameState.players[i + 1]["legs"][currentLegNum];
+    var playerPosition = gameState.players[i]["legs"][currentLegNum];
     var score = playerPosition.score;
     score += playerPosition.rolls;
     if (playerPosition.rolls > 0) {
@@ -546,22 +546,26 @@ function scoreLeg(gameState, winnerCamel, runnerUpCamel) {
     for (let k in playerPosition.legBets) {
       if (k === winnerCamel) {
         score += _.sum(playerPosition.legBets[k]);
-        maxPartnerPayoff = _.max(playerPosition.legBets[k]);
+        if (playerPosition.legBets[k].length > 0) {
+          maxPartnerPayoff = _.max(playerPosition.legBets[k]);
+        }
       } else if (k === runnerUpCamel) {
         score += playerPosition.legBets[k].length;
-        maxPartnerPayoff = Math.max(maxPartnerPayoff, 1);
+        if (playerPosition.legBets[k].length > 0) {
+          maxPartnerPayoff = Math.max(maxPartnerPayoff, 1);
+        }
       } else {
         score -= playerPosition.legBets[k].length;
       }
     }
-    gameState.players[i + 1]["legs"][currentLegNum]["score"] = Math.max(
+    gameState.players[i]["legs"][currentLegNum]["score"] = Math.max(
       score,
       0
     ); // can't go negative
 
-    if (maxPartnerPayoff < 0) {
+    if (maxPartnerPayoff < 0 || maxPartnerPayoff == undefined) {
       throw new Error(
-        "Something went wrong. Partner payoff cannot be negative"
+        "Something went wrong. Partner payoff cannot be negative or undefined"
       );
     }
 
@@ -571,8 +575,6 @@ function scoreLeg(gameState, winnerCamel, runnerUpCamel) {
       ].score = maxPartnerPayoff;
     }
   }
-
-  //todo add partnership payoffs
 }
 
 function newLeg(gameState) {

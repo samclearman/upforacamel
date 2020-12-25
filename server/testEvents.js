@@ -22,6 +22,18 @@ function addDiceRolls(num) {
       type: "rollDice",
       player: "3",
     },
+    {
+      type: "rollDice",
+      player: "4",
+    },
+    {
+      type: "rollDice",
+      player: "5",
+    },
+    {
+      type: "rollDice",
+      player: "6",
+    }
   ];
   for (var i = 0; i < num; i++) {
     toReturn = toReturn.concat(array);
@@ -139,16 +151,8 @@ var exampleEvents = [
   {
     type: "rollDice",
     player: "6",
-  },
-  {
-    type: "rollDice",
-    player: "1",
-  },
-  {
-    type: "rollDice",
-    player: "2",
-  },
-];
+  }
+].concat(addDiceRolls(100));
 
 var gameState = getInitialGameState();
 makeNewPlayer(gameState, "hi1");
