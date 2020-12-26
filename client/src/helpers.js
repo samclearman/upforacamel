@@ -140,8 +140,14 @@ export function getLongBets(gameState) {
     return { toLose: [], toWin: [] };
   }
   return {
-    toLose: gameState.shortRaceBets.map((b) => parseInt(b.player)),
-    toWin: gameState.longRaceBets.map((b) => parseInt(b.player)),
+    toLose: gameState.shortRaceBets.map((b) => ({
+      player: parseInt(b.player),
+      camel: camelToNumber(b.color),
+    })),
+    toWin: gameState.longRaceBets.map((b) => ({
+      player: parseInt(b.player),
+      camel: camelToNumber(b.color),
+    })),
   };
 }
 

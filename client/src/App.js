@@ -17,7 +17,7 @@ import {
 import { useModal } from "./Modal";
 import { Track } from "./Track";
 import { Bets } from "./Bets";
-import { LongBets } from "./LongBets";
+import { LongBets, FinalLongBets } from "./LongBets";
 import { Dice } from "./Dice";
 import { PlayerName, Player } from "./Player";
 import "./App.css";
@@ -232,17 +232,17 @@ function Game(props) {
       </div>
     );
   } else if (getStatus() === "ended") {
-    const players = getPlayers(getGameState()).sort(
-      (p, q) => q.money - p.money
-    );
+    const players = getPlayers(getGameState())
+      .map((p, i) => ({ ...p, i }))
+      .sort((p, q) => q.money - p.money);
     return (
       <div style={{ textAlign: "center" }}>
         <div>
           <h3>Players</h3>
           <div>
-            {players.map((p, i) => (
+            {players.map((p) => (
               <h3>
-                <Player number={i + 1} player={p} changeName={changeName} />
+                <Player number={p.i + 1} player={p} changeName={changeName} />
               </h3>
             ))}
           </div>
@@ -253,6 +253,11 @@ function Game(props) {
           finishers={getFinishers(getGameState())}
           crowds={getCrowds(getGameState())}
           placeCrowd={placeCrowd}
+        />
+
+        <FinalLongBets
+          toLose={getLongBets(getGameState()).toLose}
+          toWin={getLongBets(getGameState()).toWin}
         />
       </div>
     );

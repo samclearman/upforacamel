@@ -682,8 +682,12 @@ export function getInitialGameState() {
   return _.cloneDeep(initialGameState);
 }
 
-export function redactGameState(gameState, players) {
+export function redactGameState(gameState, assignedPlayers) {
   const redacted = _.cloneDeep(gameState);
+  const players =
+    redacted.status === "ended"
+      ? Object.keys(redacted.players)
+      : assignedPlayers;
   for (const player of players) {
     if (!redacted.players[player]) {
       continue;
@@ -694,7 +698,9 @@ export function redactGameState(gameState, players) {
     );
   }
   for (const k of ["longRaceBets", "shortRaceBets"]) {
-    redacted[k] = redacted[k].map((b) => ({ ...b, color: null }));
+    redacted[k] = redacted[k].map((b) =>
+      !players.includes(b.player) ? { ...b, color: null } : b
+    );
   }
   return redacted;
 }

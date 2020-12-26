@@ -17,18 +17,19 @@ function LongBet(props) {
   const longBetStyle = {
     ...longBetStyleBase,
     border: "1px solid black",
-    backgroundColor: color,
-    color: color,
   };
+  if (camel && player) {
+    longBetStyle.background = `linear-gradient(0deg, ${camelToColor(
+      camel
+    )} 0 66%, ${playerNumberToColor(player)} 66%)`;
+  } else {
+    longBetStyle.background = color;
+  }
   if (i > 0) {
     longBetStyle.borderLeft = 0;
   }
 
-  return (
-    <div style={longBetStyle} onClick={onClick}>
-      {camel || player}
-    </div>
-  );
+  return <div style={longBetStyle} onClick={onClick}></div>;
 }
 
 function LongBetButton(props) {
@@ -54,10 +55,29 @@ function LongBetButton(props) {
   );
 }
 
+export function FinalLongBets(props) {
+  const { toWin, toLose } = props;
+  const renderedToWin = toWin.map(({ player, camel }, i) => (
+    <LongBet i={i} player={player} camel={camel} />
+  ));
+  const renderedToLose = toLose.map(({ player, camel }, i) => (
+    <LongBet player={player} i={i} camel={camel} />
+  ));
+
+  return (
+    <div>
+      <h3>🏅</h3>
+      <div>{renderedToWin}</div>
+      <h3>🐌</h3>
+      <div>{renderedToLose}</div>
+    </div>
+  );
+}
+
 export function LongBets(props) {
   const { toWin, toLose, available, onPlace } = props;
   const renderedToWin = toWin
-    .map((p, i) => <LongBet i={i} player={p} />)
+    .map(({ player: p }, i) => <LongBet i={i} player={p} />)
     .concat(
       <LongBetButton
         available={available}
@@ -67,7 +87,7 @@ export function LongBets(props) {
       </LongBetButton>
     );
   const renderedToLose = toLose
-    .map((p, i) => <LongBet player={p} i={i} />)
+    .map(({ player: p }, i) => <LongBet player={p} i={i} />)
     .concat(
       <LongBetButton
         available={available}
