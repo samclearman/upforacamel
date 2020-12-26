@@ -1,7 +1,3 @@
-cd client
-npm run-script build
-cd ..
-rm -rf server/static
-cp -R client/build server/static
+./build.sh
 cd server
 gcloud app deploy --stop-previous-version

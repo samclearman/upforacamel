@@ -164,7 +164,7 @@ function Game(props) {
     );
   if (getStatus() === "init") {
     return (
-      <div>
+      <div style={{ textAlign: "center" }}>
         <h3>Players</h3>
         <div>
           {getPlayers(getGameState()).map((p, i) => (
