@@ -145,12 +145,27 @@ function Game(props) {
   const startButtonStyle = {
     marginTop: "30px",
   };
-  const title = "";
+  const yourTurnStyle = {
+    color: "white",
+    backgroundColor: "black",
+    paddingLeft: "2px",
+    paddingRight: "2px",
+  };
+
+  const title =
+    getStatus() === "inprogress" &&
+    getAssignedPlayer() === getGameState().currentPlayer ? (
+      <h2>
+        <span style={yourTurnStyle}>It's your turn!</span>
+      </h2>
+    ) : (
+      <h2>Up for a camel</h2>
+    );
   return (
     <div style={containerStyle}>
       {getStatus() === "inprogress" && (
         <div>
-          <h2>Up for a camel</h2>
+          {title}
           <Track
             positions={getPositions(getGameState())}
             crowds={getCrowds(getGameState())}
