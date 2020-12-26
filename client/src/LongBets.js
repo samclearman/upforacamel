@@ -36,6 +36,7 @@ function LongBetButton(props) {
   const style = {
     ...longBetStyleBase,
     border: "1px solid white",
+    cursor: "pointer",
   };
   const [renderModal, showLongBetModal] = useModal();
   const renderedAvailableLongBets = available.map((c, i) => (
@@ -45,7 +46,7 @@ function LongBetButton(props) {
     <div style={style} onClick={showLongBetModal}>
       {renderModal(
         <div>
-          <div>{renderedAvailableLongBets}</div>
+          <div style={{ cursor: "pointer" }}>{renderedAvailableLongBets}</div>
         </div>
       )}
       {props.children}

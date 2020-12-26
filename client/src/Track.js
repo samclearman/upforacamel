@@ -1,5 +1,5 @@
 import React from "react";
-import { playerNumberToColor, camelToColor } from "./helpers"
+import { playerNumberToColor, camelToColor } from "./helpers";
 import { useModal } from "./Modal";
 
 function TrackTile(props) {
@@ -39,6 +39,8 @@ function Crowd(props) {
     verticalAlign: "middle",
     textAlign: "center",
     border: "1px solid black",
+    width: "30px",
+    cursor: "pointer",
   };
   const innerStyle = {
     textAlign: "center",
@@ -48,17 +50,17 @@ function Crowd(props) {
     width: "18px",
   };
   const renderedCrowd = crowd ? glyph : "";
-  const chooserStyle = { backgroundColor: "white" };
+  const chooserStyle = { ...style, backgroundColor: "white" };
   return (
     <td style={style} onClick={showModal}>
       {renderModal(
         <table>
           <tr>
             <td style={chooserStyle} onClick={() => onPlace(-1)}>
-              {"←"}
+              <div style={innerStyle}>{"🦴"}</div>
             </td>
             <td style={chooserStyle} onClick={() => onPlace(1)}>
-              {"→"}
+              <div style={innerStyle}>{"🌴"}</div>
             </td>
           </tr>
         </table>
