@@ -50,12 +50,14 @@ function getCookie() {
 
 function Game(props) {
   const { id } = props;
-  const [currentPlayer, setCurrentPlayer] = useState("noplayer");
+  const [currentPlayer, setCurrentPlayer] = useState(null);
   const [_gameState, _setGameState] = useState(null);
 
   const setGameState = (gameState) => {
     _setGameState(gameState);
   };
+
+  let socket, setSocket;
   const handleEvent = (type, event) => {
     switch (type) {
       case "game_state":
@@ -63,10 +65,18 @@ function Game(props) {
         break;
       case "player_assignment":
         setCurrentPlayer(event.players[0]);
+        const name = localStorage.getItem("playerName");
+        if (name) {
+          socket &&
+            socket.emit("change_name", {
+              player: event.players[0],
+              displayName: name,
+            });
+        }
         break;
     }
   };
-  const [socket, setSocket] = useState(() => {
+  [socket, setSocket] = useState(() => {
     return makeSocket(id, handleEvent);
   });
 
@@ -106,6 +116,7 @@ function Game(props) {
   };
 
   const changeName = (player, displayName) => {
+    localStorage.setItem("playerName", displayName);
     socket.emit("change_name", { player, displayName });
   };
 

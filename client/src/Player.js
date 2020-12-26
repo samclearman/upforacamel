@@ -8,15 +8,9 @@ export function Player(props) {
   const renderedBets = player.bets.map((b, i) => (
     <Bet i={i} camel={b.camel} bet={b.payout} />
   ));
-  const playerStyle = {
-    // border: `5px solid ${playerNumberToColor(number)}`,
-  };
   const playerColorStyle = {
     color: playerNumberToColor(number),
   };
-  // if (active) {
-  //   playerStyle.border = "1px solid black";
-  // }
   let [name, setName] = useState(player.name);
   let [timeoutId, setTimeoutId] = useState();
   let [pendingUpdate, setPendingUpdate] = useState(false);
@@ -29,7 +23,7 @@ export function Player(props) {
       setTimeout(() => {
         changeName(number, name);
         pendingUpdate = false;
-      }, 1000)
+      }, 300)
     );
   };
   const nameComponent = editable ? (
@@ -51,15 +45,15 @@ export function Player(props) {
     marginLeft: "10px",
   };
   return (
-    <div style={playerStyle}>
+    <div>
       <h3>
         {nameComponent}
         <div style={moneyStyle}>💰{player.money}</div>
       </h3>
 
-      <table class="player-bets">
-        <tr>{renderedBets}</tr>
-      </table>
+      <div class="player-bets">
+        <div>{renderedBets}</div>
+      </div>
     </div>
   );
 }
