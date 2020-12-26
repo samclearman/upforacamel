@@ -29,7 +29,11 @@ function LongBet(props) {
     longBetStyle.borderLeft = 0;
   }
 
-  return <div style={longBetStyle} onClick={onClick}></div>;
+  return (
+    <div style={longBetStyle} onClick={onClick}>
+      &nbsp;
+    </div>
+  );
 }
 
 function LongBetButton(props) {

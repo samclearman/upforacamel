@@ -37,9 +37,8 @@ function Crowd(props) {
   const { crowd, onPlace } = props;
   const [renderModal, showModal] = useModal();
   const { player, direction } = crowd || {};
-  const glyph = direction > 0 ? "🌴" : "🦴";
+  const glyph = direction > 0 ? "🌴" : "💀";
   const style = {
-    backgroundColor: playerNumberToColor(player),
     verticalAlign: "middle",
     textAlign: "center",
     border: "1px solid black",
@@ -47,12 +46,18 @@ function Crowd(props) {
     cursor: "pointer",
   };
   const innerStyle = {
+    backgroundColor: playerNumberToColor(player),
     textAlign: "center",
     marginLeft: "auto",
     marginRight: "auto",
-    height: "28px",
-    width: "18px",
+    height: "20px",
+    width: "20px",
+    border: "1px solid black",
+    lineHeight: "20px",
   };
+  if (!crowd) {
+    innerStyle.border = "1px solid white";
+  }
   const renderedCrowd = crowd ? glyph : "";
   const chooserStyle = { ...style, backgroundColor: "white" };
   return (
@@ -61,7 +66,7 @@ function Crowd(props) {
         <table>
           <tr>
             <td style={chooserStyle} onClick={() => onPlace(-1)}>
-              <div style={innerStyle}>{"🦴"}</div>
+              <div style={innerStyle}>{"💀"}</div>
             </td>
             <td style={chooserStyle} onClick={() => onPlace(1)}>
               <div style={innerStyle}>{"🌴"}</div>

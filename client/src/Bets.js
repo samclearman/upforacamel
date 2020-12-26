@@ -4,9 +4,7 @@ import { camelToColor, camelToTextColor } from "./helpers";
 
 export function Bet(props) {
   const { camel, bet, onPlace, i } = props;
-  if (!bet) {
-    return <div></div>;
-  }
+
   const betStyle = {
     border: "1px solid black",
     width: "30px",
@@ -14,17 +12,24 @@ export function Bet(props) {
     paddingTop: "12px",
     display: "inline-block",
     textAlign: "center",
-
-    color: camelToTextColor(camel),
-    backgroundColor: camelToColor(camel),
   };
+  if (bet) {
+    Object.assign(betStyle, {
+      color: camelToTextColor(camel),
+      backgroundColor: camelToColor(camel),
+      cursor: "pointer",
+    });
+  }
   if (i > 0) {
     betStyle.borderLeft = 0;
   }
-  return (
+
+  return bet ? (
     <div style={betStyle} onClick={onPlace}>
       {bet}
     </div>
+  ) : (
+    <div style={betStyle}>&nbsp;</div>
   );
 }
 
