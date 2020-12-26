@@ -82,7 +82,7 @@ export function getPositions(gameState) {
     return [];
   }
   return Object.values(gameState.track).map((v) =>
-    v.camels.map((c) => camelToNumber(c))
+    v.camels.map((c) => camelToNumber(c)).reverse()
   );
 }
 
