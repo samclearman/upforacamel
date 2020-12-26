@@ -73,8 +73,8 @@ const registerCookie = (observerId, cookie) => {
     cookies[cookie] = { players: [player] };
   }
   game.observers[observerId].cookie = cookie;
-  issuePlayerUpdate(observerId);
   issueUpdate(gameId);
+  issuePlayerUpdate(observerId);
 };
 
 const start = (gameId) => {
@@ -131,8 +131,6 @@ io.on("connection", (socket) => {
 
       console.log("new game state");
     });
-
-    socket.emit("game_state", games[gameId].state);
   });
 });
 

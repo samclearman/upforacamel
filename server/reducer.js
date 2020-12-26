@@ -248,7 +248,7 @@ function placeDesertTile(gameState, event) {
   track[desertTileIndex]["tiles"] = [isOasis ? "+" : "-"];
   gameState["players"][currentPlayer]["legs"][currentLegNum][
     "desertTile"
-  ] = isOasis ? desertTileIndex: -1 * desertTileIndex;
+  ] = isOasis ? desertTileIndex : -1 * desertTileIndex;
 }
 
 var colorCamels = ["red", "blue", "purple", "yellow", "green"];
@@ -463,7 +463,7 @@ function scoreGame(gameState, camelsToMove) {
 
   var payoffs = [8, 5, 3, 2]; // everyone gets at least 1
   for (var key in gameState.longRaceBets) {
-    var o = gameState.longRaceBets[key]
+    var o = gameState.longRaceBets[key];
     if (o.color == winnerCamel) {
       scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1;
     } else {
@@ -473,7 +473,7 @@ function scoreGame(gameState, camelsToMove) {
 
   payoffs = [8, 5, 3, 2]; // everyone gets at least 1
   for (var key in gameState.shortRaceBets) {
-    var o = gameState.shortRaceBets[key]
+    var o = gameState.shortRaceBets[key];
     if (o.color == loserCamel) {
       scores[o.player] += payoffs.length > 0 ? payoffs.shift() : 1;
     } else {
@@ -558,10 +558,7 @@ function scoreLeg(gameState, winnerCamel, runnerUpCamel) {
         score -= playerPosition.legBets[k].length;
       }
     }
-    gameState.players[i]["legs"][currentLegNum]["score"] = Math.max(
-      score,
-      0
-    ); // can't go negative
+    gameState.players[i]["legs"][currentLegNum]["score"] = Math.max(score, 0); // can't go negative
 
     if (maxPartnerPayoff < 0 || maxPartnerPayoff == undefined) {
       throw new Error(
@@ -595,6 +592,12 @@ function newLeg(gameState) {
 }
 
 export function updateDisplayName(gameState, player, displayName) {
+  // if (gameState.status !== "init") {
+  //   console.log(
+  //     `Invalid update. Name cannot be change in a ${gameState.status} game`
+  //   );
+  //   return;
+  // }
   gameState.players[player].displayName = displayName;
 }
 

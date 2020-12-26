@@ -21,22 +21,6 @@ import { Dice } from "./Dice";
 import { Player } from "./Player";
 import "./App.css";
 
-function makeSocket(gameId, handleEvent) {
-  const socket = io();
-  // const socket = io("http://localhost:8080");
-  socket.on("connect", () => {
-    const cookie = getCookie();
-    socket.emit("join", {
-      gameId,
-      cookie,
-    });
-  });
-
-  socket.on("game_state", (e) => handleEvent("game_state", e));
-  socket.on("player_assignment", (e) => handleEvent("player_assignment", e));
-  return socket;
-}
-
 function getCookie() {
   var cookie = localStorage.getItem("camelCookie");
   if (cookie) {
@@ -48,25 +32,32 @@ function getCookie() {
   return cookie;
 }
 
-function Game(props) {
-  const { id } = props;
-  const [currentPlayer, setCurrentPlayer] = useState(null);
-  const [_gameState, _setGameState] = useState(null);
+function makeSocket(gameId, onEvent) {
+  const socket = io();
+  // const socket = io("http://localhost:8080");
+  socket.on("connect", () => {
+    const cookie = getCookie();
+    socket.emit("join", {
+      gameId,
+      cookie,
+    });
+  });
 
-  const setGameState = (gameState) => {
-    _setGameState(gameState);
-  };
-
-  let socket, setSocket;
+  let _nEvents = 0;
+  let _gameState = null;
+  let _assignedPlayer = null;
+  const getStatus = () => _gameState?.status || "disconnected";
   const handleEvent = (type, event) => {
     switch (type) {
       case "game_state":
-        setGameState(event);
+        console.log("got game state", event);
+        _gameState = event;
         break;
       case "player_assignment":
-        setCurrentPlayer(event.players[0]);
+        _assignedPlayer = event.players[0];
         const name = localStorage.getItem("playerName");
-        if (name) {
+        console.log("status?", getStatus());
+        if (getStatus() === "init" && name) {
           socket &&
             socket.emit("change_name", {
               player: event.players[0],
@@ -75,24 +66,42 @@ function Game(props) {
         }
         break;
     }
+    console.log("calling onEvent");
+    _nEvents += 1;
+    onEvent(_nEvents);
   };
-  [socket, setSocket] = useState(() => {
-    return makeSocket(id, handleEvent);
+  socket.on("game_state", (e) => handleEvent("game_state", e));
+  socket.on("player_assignment", (e) => handleEvent("player_assignment", e));
+
+  const getGameState = () => _gameState;
+  const getAssignedPlayer = () => _assignedPlayer;
+  return { socket, handleEvent, getGameState, getAssignedPlayer, getStatus };
+}
+
+function Game(props) {
+  const { id } = props;
+  // "nevents" is a hack to force rerender
+  const [nEvents, setNEvents] = useState(0);
+  const [s] = useState(() => {
+    return makeSocket(id, (n) => {
+      setNEvents(n);
+    });
   });
+  const { socket, handleEvent, getGameState, getAssignedPlayer, getStatus } = s;
 
   const emitEvent = (type, data) => {
-    if (!_gameState?.currentPlayer) {
+    if (!getGameState()?.currentPlayer) {
       return;
     }
     socket.emit("event", {
       type,
-      player: _gameState.currentPlayer,
+      player: getGameState().currentPlayer,
       data,
     });
   };
 
   const isActive = (player) => {
-    return _gameState?.currentPlayer === (player + 1).toString();
+    return getGameState()?.currentPlayer === (player + 1).toString();
   };
 
   const placeBet = (camel) => {
@@ -124,7 +133,6 @@ function Game(props) {
     emitEvent("rollDice", {});
   };
 
-  const status = _gameState?.status || "disconnected";
   const containerStyle = {
     display: "flex",
     flexWrap: "wrap",
@@ -137,48 +145,56 @@ function Game(props) {
   const startButtonStyle = {
     marginTop: "30px",
   };
+  const title = "";
   return (
     <div style={containerStyle}>
-      {status === "inprogress" && (
+      {getStatus() === "inprogress" && (
         <div>
           <h2>Up for a camel</h2>
           <Track
-            positions={getPositions(_gameState)}
-            crowds={getCrowds(_gameState)}
+            positions={getPositions(getGameState())}
+            crowds={getCrowds(getGameState())}
             placeCrowd={placeCrowd}
           />
 
           <h3>Bets</h3>
-          <Bets available={getAvailableBets(_gameState)} onPlace={placeBet} />
+          <Bets
+            available={getAvailableBets(getGameState())}
+            onPlace={placeBet}
+          />
 
           <h3>Race Bets</h3>
           <LongBets
-            toLose={getLongBets(_gameState).toLose}
-            toWin={getLongBets(_gameState).toWin}
-            available={getAvailableLongBets(_gameState, currentPlayer)}
+            toLose={getLongBets(getGameState()).toLose}
+            toWin={getLongBets(getGameState()).toWin}
+            available={getAvailableLongBets(
+              getGameState(),
+              getAssignedPlayer()
+            )}
             onPlace={placeLongBet}
           />
 
           <h3>Rolls</h3>
-          <Dice rolled={getRolls(_gameState)} onRoll={roll} />
+          <Dice rolled={getRolls(getGameState())} onRoll={roll} />
         </div>
       )}
       <div style={playersStyle}>
         <h3 style={{ marginTop: "27px" }}>Players</h3>
         <div id="players">
-          {getPlayers(_gameState).map((p, i) => (
+          {getPlayers(getGameState()).map((p, i) => (
             <Player
               number={i + 1}
               player={p}
               active={isActive(i)}
               editable={
-                status === "init" && (i + 1).toString() === currentPlayer
+                getStatus() === "init" &&
+                (i + 1).toString() === getAssignedPlayer()
               }
               changeName={changeName}
             />
           ))}
         </div>
-        {status === "init" && (
+        {getStatus() === "init" && (
           <button style={startButtonStyle} onClick={startGame}>
             Start game
           </button>
