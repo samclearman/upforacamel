@@ -34,8 +34,9 @@ function getCookie() {
 }
 
 function makeSocket(gameId, onEvent) {
-  const socket = io();
-  // const socket = io("http://localhost:8080");
+  console.log(`env: ${process.env.NODE_ENV}`);
+  const socket =
+    process.env.NODE_ENV === "development" ? io("http://localhost:8080") : io();
   socket.on("connect", () => {
     const cookie = getCookie();
     socket.emit("join", {
@@ -51,13 +52,13 @@ function makeSocket(gameId, onEvent) {
   const handleEvent = (type, event) => {
     switch (type) {
       case "game_state":
-        console.log("got game state", event);
+        process.env.NODE_ENV === "development" &&
+          console.log("got game state", event);
         _gameState = event;
         break;
       case "player_assignment":
         _assignedPlayer = event.players[0];
         const name = localStorage.getItem("playerName");
-        console.log("status?", getStatus());
         if (getStatus() === "init" && name) {
           socket &&
             socket.emit("change_name", {
@@ -67,7 +68,6 @@ function makeSocket(gameId, onEvent) {
         }
         break;
     }
-    console.log("calling onEvent");
     _nEvents += 1;
     onEvent(_nEvents);
   };
