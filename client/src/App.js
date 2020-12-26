@@ -233,7 +233,7 @@ function Game(props) {
     );
   } else if (getStatus() === "ended") {
     const players = getPlayers(getGameState()).sort(
-      (p, q) => p.money - q.money
+      (p, q) => q.money - p.money
     );
     return (
       <div style={{ textAlign: "center" }}>
