@@ -86,6 +86,13 @@ export function getPositions(gameState) {
   );
 }
 
+export function getFinishers(gameState) {
+  if (!gameState) {
+    return [];
+  }
+  return (gameState.finishers || []).map((c) => camelToNumber(c)).reverse();
+}
+
 export function getCrowds(gameState) {
   if (!gameState) {
     return [];
@@ -153,9 +160,11 @@ export function getPlayers(gameState) {
   return Object.entries(gameState.players).map(([n, p]) => {
     const lastLeg = Object.values(p.legs).slice(-1)[0];
     const bets = [];
-    for (const c in lastLeg.legBets) {
-      for (const payout of lastLeg.legBets[c]) {
-        bets.push({ camel: camelToNumber(c), payout });
+    if (gameState.status === "inprogress") {
+      for (const c in lastLeg.legBets) {
+        for (const payout of lastLeg.legBets[c]) {
+          bets.push({ camel: camelToNumber(c), payout });
+        }
       }
     }
     let money = Object.values(p.legs)

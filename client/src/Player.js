@@ -3,14 +3,8 @@ import React, { useState } from "react";
 import { playerNumberToColor } from "./helpers";
 import { Bet } from "./Bets";
 
-export function Player(props) {
-  const { number, player, active, editable, changeName } = props;
-  const renderedBets = player.bets.map((b, i) => (
-    <Bet i={i} camel={b.camel} bet={b.payout} />
-  ));
-  const playerColorStyle = {
-    color: playerNumberToColor(number),
-  };
+export function PlayerName(props) {
+  const { editable, player, number, changeName } = props;
   let [name, setName] = useState(player.name);
   let [timeoutId, setTimeoutId] = useState();
   let [pendingUpdate, setPendingUpdate] = useState(false);
@@ -26,18 +20,40 @@ export function Player(props) {
       }, 300)
     );
   };
-  const nameComponent = editable ? (
+
+  const playerColorStyle = {
+    color: playerNumberToColor(number),
+  };
+  return editable ? (
     <form>
+      <span style={playerColorStyle}>■</span>
       <input
         type="text"
         value={pendingUpdate ? name : player.name}
         onChange={handleNameChange}
-      ></input>
+        autofocus="true"
+      />
     </form>
   ) : (
     <>
       <span style={playerColorStyle}>■</span> {player.name}
     </>
+  );
+}
+
+export function Player(props) {
+  const { number, player, active, editable, changeName } = props;
+  const renderedBets = player.bets.map((b, i) => (
+    <Bet i={i} camel={b.camel} bet={b.payout} />
+  ));
+
+  const nameComponent = (
+    <PlayerName
+      player={player}
+      number={number}
+      editable={editable}
+      changeName={changeName}
+    />
   );
   const moneyStyle = {
     fontWeight: "normal",

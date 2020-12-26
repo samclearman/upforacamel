@@ -3,7 +3,7 @@ import { playerNumberToColor, camelToColor } from "./helpers";
 import { useModal } from "./Modal";
 
 function TrackTile(props) {
-  const { camels } = props;
+  const { camels, finish } = props;
 
   const renderedCamels = camels.map((c) => {
     const camelStyle = {
@@ -26,6 +26,10 @@ function TrackTile(props) {
     textAlign: "center",
     backgroundColor: "beige",
   };
+  if (finish) {
+    camelTdStyle.border = "1px solid white";
+    camelTdStyle.backgroundColor = "white";
+  }
   return <td style={camelTdStyle}>{renderedCamels}</td>;
 }
 
@@ -71,12 +75,17 @@ function Crowd(props) {
 }
 
 export function Track(props) {
-  const { positions, crowds, placeCrowd } = props;
+  const { positions, crowds, placeCrowd, finishers } = props;
   const renderedTiles = positions.map((p) => <TrackTile camels={p} />);
+  if (finishers && finishers.length) {
+    renderedTiles.push(<TrackTile camels={finishers} finish={true} />);
+  }
   const renderedCrowds = crowds.map((c, i) => (
     <Crowd crowd={c} onPlace={(direction) => placeCrowd(i, direction)} />
   ));
   const trackStyle = {
+    marginLeft: "auto",
+    marginRight: "auto",
     maxWidth: "100%",
   };
   return (

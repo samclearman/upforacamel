@@ -6,6 +6,7 @@ import {
   camelToColor,
   getPositions,
   getCrowds,
+  getFinishers,
   getCurrentLeg,
   getAvailableBets,
   getLongBets,
@@ -18,7 +19,7 @@ import { Track } from "./Track";
 import { Bets } from "./Bets";
 import { LongBets } from "./LongBets";
 import { Dice } from "./Dice";
-import { Player } from "./Player";
+import { PlayerName, Player } from "./Player";
 import "./App.css";
 
 function getCookie() {
@@ -161,9 +162,31 @@ function Game(props) {
     ) : (
       <h2>Up for a camel</h2>
     );
-  return (
-    <div style={containerStyle}>
-      {getStatus() === "inprogress" && (
+  if (getStatus() === "init") {
+    return (
+      <div>
+        <h3>Players</h3>
+        <div>
+          {getPlayers(getGameState()).map((p, i) => (
+            <h3>
+              <PlayerName
+                number={i + 1}
+                player={p}
+                active={isActive(i)}
+                editable={(i + 1).toString() === getAssignedPlayer()}
+                changeName={changeName}
+              />
+            </h3>
+          ))}
+        </div>
+        <button style={startButtonStyle} onClick={startGame}>
+          Start game
+        </button>
+      </div>
+    );
+  } else if (getStatus() === "inprogress") {
+    return (
+      <div style={containerStyle}>
         <div>
           {title}
           <Track
@@ -192,31 +215,49 @@ function Game(props) {
           <h3>Rolls</h3>
           <Dice rolled={getRolls(getGameState())} onRoll={roll} />
         </div>
-      )}
-      <div style={playersStyle}>
-        <h3 style={{ marginTop: "27px" }}>Players</h3>
-        <div id="players">
-          {getPlayers(getGameState()).map((p, i) => (
-            <Player
-              number={i + 1}
-              player={p}
-              active={isActive(i)}
-              editable={
-                getStatus() === "init" &&
-                (i + 1).toString() === getAssignedPlayer()
-              }
-              changeName={changeName}
-            />
-          ))}
+
+        <div style={playersStyle}>
+          <h3 style={{ marginTop: "27px" }}>Players</h3>
+          <div>
+            {getPlayers(getGameState()).map((p, i) => (
+              <Player
+                number={i + 1}
+                player={p}
+                active={isActive(i)}
+                changeName={changeName}
+              />
+            ))}
+          </div>
         </div>
-        {getStatus() === "init" && (
-          <button style={startButtonStyle} onClick={startGame}>
-            Start game
-          </button>
-        )}
       </div>
-    </div>
-  );
+    );
+  } else if (getStatus() === "ended") {
+    const players = getPlayers(getGameState()).sort(
+      (p, q) => p.money - q.money
+    );
+    return (
+      <div style={{ textAlign: "center" }}>
+        <div>
+          <h3>Players</h3>
+          <div>
+            {players.map((p, i) => (
+              <h3>
+                <Player number={i + 1} player={p} changeName={changeName} />
+              </h3>
+            ))}
+          </div>
+        </div>
+
+        <Track
+          positions={getPositions(getGameState())}
+          finishers={getFinishers(getGameState())}
+          crowds={getCrowds(getGameState())}
+          placeCrowd={placeCrowd}
+        />
+      </div>
+    );
+  }
+  return "Connecting...";
 }
 
 function MakeGame() {

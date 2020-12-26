@@ -335,6 +335,8 @@ function moveCamel(track, color, position, newPosition, placeUnder) {
       );
     }
   }
+
+  return camelsToMove;
 }
 
 function rollDice(gameState, event) {
@@ -380,7 +382,8 @@ function rollDice(gameState, event) {
 
   var newCamelPosition = camelPosition + movement;
   if (newCamelPosition > 15) {
-    moveCamel(track, camelColor, camelPosition, null, null);
+    const moved = moveCamel(track, camelColor, camelPosition, null, null);
+    gameState.finishers = moved;
     scoreGame(gameState, camelsToMove);
     return;
   }
@@ -397,7 +400,8 @@ function rollDice(gameState, event) {
   }
 
   if (newCamelPosition > 15) {
-    moveCamel(track, camelColor, camelPosition, null, null);
+    const moved = moveCamel(track, camelColor, camelPosition, null, null);
+    gameState.finishers = moved;
     scoreGame(gameState, camelsToMove);
     return;
   }
