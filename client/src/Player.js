@@ -5,16 +5,18 @@ import { Bet } from "./Bets";
 
 export function Player(props) {
   const { number, player, active, editable, changeName } = props;
-  const renderedBets = player.bets.map((b) => (
-    <Bet camel={b.camel} bet={b.payout} />
+  const renderedBets = player.bets.map((b, i) => (
+    <Bet i={i} camel={b.camel} bet={b.payout} />
   ));
   const playerStyle = {
-    backgroundColor: playerNumberToColor(number),
-    border: `5px solid ${playerNumberToColor(number)}`,
+    // border: `5px solid ${playerNumberToColor(number)}`,
   };
-  if (active) {
-    playerStyle.border = "1px solid black";
-  }
+  const playerColorStyle = {
+    color: playerNumberToColor(number),
+  };
+  // if (active) {
+  //   playerStyle.border = "1px solid black";
+  // }
   let [name, setName] = useState(player.name);
   let [timeoutId, setTimeoutId] = useState();
   let [pendingUpdate, setPendingUpdate] = useState(false);
@@ -39,7 +41,9 @@ export function Player(props) {
       ></input>
     </form>
   ) : (
-    player.name
+    <>
+      <span style={playerColorStyle}>■</span> {player.name}
+    </>
   );
   const moneyStyle = {
     fontWeight: "normal",

@@ -3,33 +3,42 @@ import React from "react";
 import { camelToColor, camelToTextColor } from "./helpers";
 
 function Die(props) {
-  const { camel, roll, blank } = props;
+  const { camel, roll, blank, i } = props;
   const dieStyle = {
-    width: "20px",
-    height: "20px",
+    width: "30px",
+    height: "25px",
+    paddingTop: "5px",
     color: camelToTextColor(parseInt(camel)),
+    display: "inline-block",
+    textAlign: "center",
   };
+
   if (!blank) {
     dieStyle.background = camelToColor(parseInt(camel));
     dieStyle.border = "1px solid black";
   } else {
+    dieStyle.border = "1px solid white";
     dieStyle.cursor = "pointer";
   }
+  if (i > 0) {
+    dieStyle.borderLeft = 0;
+  }
 
-  return <td style={dieStyle}>{roll || <>&nbsp;</>}</td>;
+  return <div style={dieStyle}>{roll || <>&nbsp;</>}</div>;
 }
 
 export function Dice(props) {
   const { rolled, onRoll } = props;
-  const renderedDice = rolled.map(({ camel, number }) => (
-    <Die camel={camel} roll={number} />
+  const renderedDice = rolled.map(({ camel, number }, i) => (
+    <Die i={i} camel={camel} roll={number} />
   ));
+  const diceStyle = {};
   return (
-    <table onClick={onRoll}>
-      <tr>
-        {renderedDice}
+    <div style={diceStyle}>
+      {renderedDice}
+      <span onClick={onRoll}>
         <Die blank={true} roll={"🎲"} />
-      </tr>
-    </table>
+      </span>
+    </div>
   );
 }

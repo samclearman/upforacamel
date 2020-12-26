@@ -5,11 +5,14 @@ import { useModal } from "./Modal";
 
 const longBetStyleBase = {
   width: "30px",
-  height: "20px",
+  height: "33px",
+  paddingTop: "12px",
+  display: "inline-block",
+  textAlign: "center",
 };
 
 function LongBet(props) {
-  const { camel, player, onClick } = props;
+  const { camel, player, onClick, i } = props;
   const color = camel ? camelToColor(camel) : playerNumberToColor(player);
   const longBetStyle = {
     ...longBetStyleBase,
@@ -17,11 +20,14 @@ function LongBet(props) {
     backgroundColor: color,
     color: color,
   };
+  if (i > 0) {
+    longBetStyle.borderLeft = 0;
+  }
 
   return (
-    <td style={longBetStyle} onClick={onClick}>
+    <div style={longBetStyle} onClick={onClick}>
       {camel || player}
-    </td>
+    </div>
   );
 }
 
@@ -29,27 +35,28 @@ function LongBetButton(props) {
   const { available, onPlace } = props;
   const style = {
     ...longBetStyleBase,
+    border: "1px solid white",
   };
   const [renderModal, showLongBetModal] = useModal();
-  const renderedAvailableLongBets = available.map((c) => (
-    <LongBet camel={c} onClick={() => onPlace(c)} />
+  const renderedAvailableLongBets = available.map((c, i) => (
+    <LongBet i={i} camel={c} onClick={() => onPlace(c)} />
   ));
   return (
-    <td style={style} onClick={showLongBetModal}>
+    <div style={style} onClick={showLongBetModal}>
       {renderModal(
-        <table>
-          <tr>{renderedAvailableLongBets}</tr>
-        </table>
+        <div>
+          <div>{renderedAvailableLongBets}</div>
+        </div>
       )}
       {props.children}
-    </td>
+    </div>
   );
 }
 
 export function LongBets(props) {
   const { toWin, toLose, available, onPlace } = props;
   const renderedToWin = toWin
-    .map((p) => <LongBet player={p} />)
+    .map((p, i) => <LongBet i={i} player={p} />)
     .concat(
       <LongBetButton
         available={available}
@@ -59,7 +66,7 @@ export function LongBets(props) {
       </LongBetButton>
     );
   const renderedToLose = toLose
-    .map((p) => <LongBet player={p} />)
+    .map((p, i) => <LongBet player={p} i={i} />)
     .concat(
       <LongBetButton
         available={available}
@@ -69,9 +76,9 @@ export function LongBets(props) {
       </LongBetButton>
     );
   return (
-    <table class="placed-bets">
-      <tr class="placed-bets-to-win">{renderedToWin}</tr>
-      <tr class="placed-bets-to-lose">{renderedToLose}</tr>
-    </table>
+    <div>
+      <div>{renderedToWin}</div>
+      <div>{renderedToLose}</div>
+    </div>
   );
 }
