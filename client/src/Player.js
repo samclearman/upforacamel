@@ -4,7 +4,7 @@ import { playerNumberToColor } from "./helpers";
 import { Bet } from "./Bets";
 
 export function PlayerName(props) {
-  const { editable, player, number, changeName } = props;
+  const { editable, active, player, number, changeName } = props;
   let [name, setName] = useState(player.name);
   let [timeoutId, setTimeoutId] = useState();
   let [pendingUpdate, setPendingUpdate] = useState(false);
@@ -24,6 +24,14 @@ export function PlayerName(props) {
   const playerColorStyle = {
     color: playerNumberToColor(number),
   };
+  const playerNameStyle = active
+    ? {
+        backgroundColor: "black",
+        color: "white",
+        paddingLeft: "2px",
+        paddingRight: "2px",
+      }
+    : {};
   return editable ? (
     <form>
       <span style={playerColorStyle}>■</span>
@@ -36,7 +44,8 @@ export function PlayerName(props) {
     </form>
   ) : (
     <>
-      <span style={playerColorStyle}>■</span> {player.name}
+      <span style={playerColorStyle}>■</span>{" "}
+      <span style={playerNameStyle}>{player.name}</span>
     </>
   );
 }
@@ -51,6 +60,7 @@ export function Player(props) {
     <PlayerName
       player={player}
       number={number}
+      active={active}
       editable={editable}
       changeName={changeName}
     />
