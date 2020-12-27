@@ -13,7 +13,8 @@ import { useModal } from "./Modal";
 // emprical testing gives ~ (vw - 154px)  / 16
 // ¯\_(ツ)_/¯
 
-const tileSide = "min(23px, (100vw - 154px) / 16";
+const maxTileSide = "23px";
+const tileSide = `min(${maxTileSide}, (100vw - 154px) / 16)`;
 const tileDimensions = {
   width: tileSide,
   // maxWidth: "4.6vw",
@@ -75,7 +76,7 @@ function Crowd(props) {
     backgroundColor: playerNumberToColor(player),
     textAlign: "center",
     border: "1px solid black",
-    fontSize: "min(20px, 3.6vw)",
+    fontSize: `calc(${tileSide} - 5px)`,
     lineHeight: tileSide,
   };
   if (!crowd) {
@@ -84,6 +85,10 @@ function Crowd(props) {
   const renderedCrowd = crowd ? glyph : "";
   const chooserStyle = {
     ...innerStyle,
+    width: maxTileSide,
+    height: maxTileSide,
+    lineHeight: maxTileSide,
+    fontSize: `calc(maxTileSide - 5px)`,
     backgroundColor: "white",
     border: "1px solid white",
   };
