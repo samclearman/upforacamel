@@ -27,16 +27,19 @@ const tileDimensions = {
 function TrackTile(props) {
   const { camels, finish } = props;
 
-  const renderedCamels = camels.map((c) => {
+  const renderedCamels = camels.map((c, i) => {
     const camelStyle = {
       ...tileDimensions,
       marginTop: 0,
       marginBottom: 0,
       border: "1px solid black",
+      borderBottom: 0,
       color: camelToColor(c),
       backgroundColor: camelToColor(c),
     };
-
+    if (finish && i === camels.length - 1) {
+      camelStyle.borderBottom = "1px solid black";
+    }
     return (
       <div key={c} style={camelStyle}>
         &nbsp;
@@ -119,7 +122,9 @@ export function Track(props) {
     <TrackTile key={i} camels={p} />
   ));
   if (finishers && finishers.length) {
-    renderedTiles.push(<TrackTile camels={finishers} finish={true} />);
+    renderedTiles.push(
+      <TrackTile key={positions.length} camels={finishers} finish={true} />
+    );
   }
   const renderedCrowds = crowds.map((c, i) => (
     <Crowd

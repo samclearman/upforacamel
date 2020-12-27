@@ -255,12 +255,20 @@ function Game(props) {
           </div>
         </div>
 
-        <Track
-          positions={getPositions(getGameState())}
-          finishers={getFinishers(getGameState())}
-          crowds={getCrowds(getGameState())}
-          placeCrowd={placeCrowd}
-        />
+        <div
+          style={{
+            marginLeft: "auto",
+            marginRight: "auto",
+            width: "fit-content",
+          }}
+        >
+          <Track
+            positions={getPositions(getGameState())}
+            finishers={getFinishers(getGameState())}
+            crowds={getCrowds(getGameState())}
+            placeCrowd={placeCrowd}
+          />
+        </div>
 
         <FinalLongBets
           toLose={getLongBets(getGameState()).toLose}
