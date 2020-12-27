@@ -39,6 +39,7 @@ export function startGame(gameState) {
       track[16 - number]["camels"].push(color);
     }
   }
+  gameState.currentPlayer = _.sample(Object.keys(gameState.players));
   gameState.status = "inprogress";
 }
 
