@@ -138,7 +138,7 @@ function Game(props) {
     flexWrap: "wrap",
     marginLeft: "auto",
     marginRight: "auto",
-    maxWidth: "700px",
+    maxWidth: "fit-content",
   };
   const innerContainerStyle = {
     marginRight: "30px",
@@ -146,6 +146,7 @@ function Game(props) {
   };
   const playersStyle = {
     marginLeft: "3px",
+    maxWidth: "250px",
     //marginLeft: "30px",
   };
   const startButtonStyle = {
@@ -173,7 +174,7 @@ function Game(props) {
         <h3>Players</h3>
         <div>
           {getPlayers(getGameState()).map((p, i) => (
-            <h3>
+            <h3 key={i}>
               <PlayerName
                 number={i + 1}
                 player={p}

@@ -2,11 +2,25 @@ import React from "react";
 import { playerNumberToColor, camelToColor } from "./helpers";
 import { useModal } from "./Modal";
 
+// col = (vw - borders) / 16
+//   borders = 17 * 1 = 17
+// col = (vw - 17) / 16
+// tile + 2 + 6 = col
+// tile = ((vw - 17) / 16) - 8
+// tile = ((vw - 17) / 16) - (96 / 16)
+// tile = (vw - 113) / 16
+
+// emprical testing gives ~ (vw - 154px)  / 16
+// ¯\_(ツ)_/¯
+
+const tileSide = "min(23px, (100vw - 154px) / 16";
 const tileDimensions = {
-  width: "25px",
-  maxWidth: "4.6vw",
-  height: "25px",
-  maxHeight: "4.6vw",
+  width: tileSide,
+  // maxWidth: "4.6vw",
+  height: tileSide,
+  //height:
+  // maxHeight: "4.6vw",
+  margin: "3px",
 };
 
 function TrackTile(props) {
@@ -15,8 +29,8 @@ function TrackTile(props) {
   const renderedCamels = camels.map((c) => {
     const camelStyle = {
       ...tileDimensions,
-      marginLeft: "auto",
-      marginRight: "auto",
+      marginTop: 0,
+      marginBottom: 0,
       border: "1px solid black",
       color: camelToColor(c),
       backgroundColor: camelToColor(c),
@@ -29,10 +43,9 @@ function TrackTile(props) {
     );
   });
   const camelTdStyle = {
-    height: "120px",
+    height: "140px",
     border: "1px solid black",
-    padding: "1px",
-    paddingBottom: "0",
+    padding: "0",
     verticalAlign: "bottom",
     textAlign: "center",
     backgroundColor: "beige",
@@ -53,7 +66,7 @@ function Crowd(props) {
     verticalAlign: "middle",
     textAlign: "center",
     border: "1px solid black",
-    padding: "1px",
+    padding: "0",
     cursor: "pointer",
     backgroundColor: "white",
   };
@@ -61,11 +74,9 @@ function Crowd(props) {
     ...tileDimensions,
     backgroundColor: playerNumberToColor(player),
     textAlign: "center",
-    marginLeft: "auto",
-    marginRight: "auto",
     border: "1px solid black",
     fontSize: "min(20px, 3.6vw)",
-    lineHeight: "min(25px, 5vw)",
+    lineHeight: tileSide,
   };
   if (!crowd) {
     innerStyle.border = "1px solid white";
