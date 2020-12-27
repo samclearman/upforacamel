@@ -137,11 +137,17 @@ function Game(props) {
   const containerStyle = {
     display: "flex",
     flexWrap: "wrap",
-    maxWidth: "100%",
-    justifyContent: "center",
+    marginLeft: "auto",
+    marginRight: "auto",
+    maxWidth: "700px",
+  };
+  const innerContainerStyle = {
+    marginRight: "30px",
+    marginLeft: "3px",
   };
   const playersStyle = {
-    marginLeft: "30px",
+    marginLeft: "3px",
+    //marginLeft: "30px",
   };
   const startButtonStyle = {
     marginTop: "30px",
@@ -187,7 +193,7 @@ function Game(props) {
   } else if (getStatus() === "inprogress") {
     return (
       <div style={containerStyle}>
-        <div>
+        <div style={innerContainerStyle}>
           {title}
           <Track
             positions={getPositions(getGameState())}

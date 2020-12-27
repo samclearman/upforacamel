@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useLayoutEffect, createRef } from "react";
 
 function Modal(props) {
-  const { close } = props;
+  const { close, contentRef } = props;
   const outerStyle = {
-    position: "absolute",
+    position: "fixed",
     left: 0,
     top: 0,
     width: "100%",
@@ -21,7 +21,9 @@ function Modal(props) {
   };
   return (
     <div style={outerStyle} onClick={handleClick}>
-      <div style={innerStyle}>{props.children}</div>
+      <div ref={contentRef} style={innerStyle}>
+        {props.children}
+      </div>
     </div>
   );
 }
@@ -35,12 +37,22 @@ export function useModal(children) {
     setModalLeft(e.clientX);
     setShowingModal(true);
   };
+
+  const contentRef = createRef();
+  let [maxLeft, setMaxLeft] = useState(0);
+  useLayoutEffect(() => {
+    setMaxLeft(window.innerWidth - (contentRef.current?.clientWidth ?? 0));
+  }, [showingModal, children]);
+
+  const clampedLeft = Math.max(0, Math.min(modalLeft, maxLeft));
+
   return [
     (children) =>
       showingModal && (
         <Modal
-          left={modalLeft}
+          left={clampedLeft}
           top={modalTop}
+          contentRef={contentRef}
           close={() => setShowingModal(false)}
         >
           {children}

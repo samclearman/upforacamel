@@ -2,13 +2,19 @@ import React from "react";
 import { playerNumberToColor, camelToColor } from "./helpers";
 import { useModal } from "./Modal";
 
+const tileDimensions = {
+  width: "25px",
+  maxWidth: "4.6vw",
+  height: "25px",
+  maxHeight: "4.6vw",
+};
+
 function TrackTile(props) {
   const { camels, finish } = props;
 
   const renderedCamels = camels.map((c) => {
     const camelStyle = {
-      width: "20px",
-      height: "20px",
+      ...tileDimensions,
       marginLeft: "auto",
       marginRight: "auto",
       border: "1px solid black",
@@ -16,12 +22,13 @@ function TrackTile(props) {
       backgroundColor: camelToColor(c),
     };
 
-    return <div style={camelStyle}>{c}</div>;
+    return <div style={camelStyle}>&nbsp;</div>;
   });
   const camelTdStyle = {
     height: "120px",
-    width: "30px",
     border: "1px solid black",
+    padding: "1px",
+    paddingBottom: "0",
     verticalAlign: "bottom",
     textAlign: "center",
     backgroundColor: "beige",
@@ -42,18 +49,18 @@ function Crowd(props) {
     verticalAlign: "middle",
     textAlign: "center",
     border: "1px solid black",
-    width: "30px",
+    padding: "1px",
     cursor: "pointer",
   };
   const innerStyle = {
+    ...tileDimensions,
     backgroundColor: playerNumberToColor(player),
     textAlign: "center",
     marginLeft: "auto",
     marginRight: "auto",
-    height: "20px",
-    width: "20px",
     border: "1px solid black",
-    lineHeight: "20px",
+    fontSize: "min(20px, 3.6vw)",
+    lineHeight: "min(25px, 5vw)",
   };
   if (!crowd) {
     innerStyle.border = "1px solid white";
@@ -81,6 +88,8 @@ function Crowd(props) {
 
 export function Track(props) {
   const { positions, crowds, placeCrowd, finishers } = props;
+  const colStyle = {};
+  const cols = positions.map(() => <col style={colStyle} />);
   const renderedTiles = positions.map((p) => <TrackTile camels={p} />);
   if (finishers && finishers.length) {
     renderedTiles.push(<TrackTile camels={finishers} finish={true} />);
@@ -88,13 +97,10 @@ export function Track(props) {
   const renderedCrowds = crowds.map((c, i) => (
     <Crowd crowd={c} onPlace={(direction) => placeCrowd(i, direction)} />
   ));
-  const trackStyle = {
-    marginLeft: "auto",
-    marginRight: "auto",
-    maxWidth: "100%",
-  };
+  const trackStyle = {};
   return (
     <table style={trackStyle}>
+      {cols}
       <tbody>
         <tr class="camels">{renderedTiles}</tr>
         <tr class="crowds">{renderedCrowds}</tr>
