@@ -51,6 +51,7 @@ function Crowd(props) {
     border: "1px solid black",
     padding: "1px",
     cursor: "pointer",
+    backgroundColor: "white",
   };
   const innerStyle = {
     ...tileDimensions,
@@ -66,17 +67,21 @@ function Crowd(props) {
     innerStyle.border = "1px solid white";
   }
   const renderedCrowd = crowd ? glyph : "";
-  const chooserStyle = { ...style, backgroundColor: "white" };
+  const chooserStyle = {
+    ...innerStyle,
+    backgroundColor: "white",
+    border: "1px solid white",
+  };
   return (
     <td style={style} onClick={showModal}>
       {renderModal(
         <table>
           <tr>
-            <td style={chooserStyle} onClick={() => onPlace(-1)}>
-              <div style={innerStyle}>{"💀"}</div>
+            <td style={style} onClick={() => onPlace(-1)}>
+              <div style={chooserStyle}>{"💀"}</div>
             </td>
-            <td style={chooserStyle} onClick={() => onPlace(1)}>
-              <div style={innerStyle}>{"🌴"}</div>
+            <td style={style} onClick={() => onPlace(1)}>
+              <div style={chooserStyle}>{"🌴"}</div>
             </td>
           </tr>
         </table>
