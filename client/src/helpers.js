@@ -27,6 +27,9 @@ function camelToNumber(camelColor) {
       return -1;
     case "white":
       return -2;
+    default:
+      console.error("unknown camel color");
+      return null;
   }
 }
 
@@ -46,6 +49,9 @@ export function camelToColor(camelNumber) {
       return "black";
     case -2:
       return "white";
+    default:
+      console.error("unknown camel number");
+      return null;
   }
 }
 
@@ -65,15 +71,11 @@ export function camelToTextColor(camelNumber) {
       return "white";
     case -2:
       return "black";
-  }
-}
+    default:
+      console.log(camelNumber);
 
-function tileToNumber(tileSymbol) {
-  switch (tileSymbol) {
-    case "+":
-      return 1;
-    case "-":
-      return -1;
+      console.error("unknown camel number");
+      return null;
   }
 }
 

@@ -22,7 +22,11 @@ function TrackTile(props) {
       backgroundColor: camelToColor(c),
     };
 
-    return <div style={camelStyle}>&nbsp;</div>;
+    return (
+      <div key={c} style={camelStyle}>
+        &nbsp;
+      </div>
+    );
   });
   const camelTdStyle = {
     height: "120px",
@@ -76,14 +80,16 @@ function Crowd(props) {
     <td style={style} onClick={showModal}>
       {renderModal(
         <table>
-          <tr>
-            <td style={style} onClick={() => onPlace(-1)}>
-              <div style={chooserStyle}>{"💀"}</div>
-            </td>
-            <td style={style} onClick={() => onPlace(1)}>
-              <div style={chooserStyle}>{"🌴"}</div>
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td style={style} onClick={() => onPlace(-1)}>
+                <div style={chooserStyle}>{"💀"}</div>
+              </td>
+              <td style={style} onClick={() => onPlace(1)}>
+                <div style={chooserStyle}>{"🌴"}</div>
+              </td>
+            </tr>
+          </tbody>
         </table>
       )}
       <div style={innerStyle}>{renderedCrowd}</div>
@@ -93,22 +99,25 @@ function Crowd(props) {
 
 export function Track(props) {
   const { positions, crowds, placeCrowd, finishers } = props;
-  const colStyle = {};
-  const cols = positions.map(() => <col style={colStyle} />);
-  const renderedTiles = positions.map((p) => <TrackTile camels={p} />);
+  const renderedTiles = positions.map((p, i) => (
+    <TrackTile key={i} camels={p} />
+  ));
   if (finishers && finishers.length) {
     renderedTiles.push(<TrackTile camels={finishers} finish={true} />);
   }
   const renderedCrowds = crowds.map((c, i) => (
-    <Crowd crowd={c} onPlace={(direction) => placeCrowd(i, direction)} />
+    <Crowd
+      key={i}
+      crowd={c}
+      onPlace={(direction) => placeCrowd(i, direction)}
+    />
   ));
   const trackStyle = {};
   return (
     <table style={trackStyle}>
-      {cols}
       <tbody>
-        <tr class="camels">{renderedTiles}</tr>
-        <tr class="crowds">{renderedCrowds}</tr>
+        <tr>{renderedTiles}</tr>
+        <tr>{renderedCrowds}</tr>
       </tbody>
     </table>
   );

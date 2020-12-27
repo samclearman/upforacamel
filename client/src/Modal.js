@@ -42,7 +42,7 @@ export function useModal(children) {
   let [maxLeft, setMaxLeft] = useState(0);
   useLayoutEffect(() => {
     setMaxLeft(window.innerWidth - (contentRef.current?.clientWidth ?? 0));
-  }, [showingModal, contentRef.current]);
+  }, [showingModal, contentRef]);
 
   const clampedLeft = Math.max(0, Math.min(modalLeft, maxLeft));
 

@@ -7,14 +7,12 @@ import {
   getPositions,
   getCrowds,
   getFinishers,
-  getCurrentLeg,
   getAvailableBets,
   getLongBets,
   getAvailableLongBets,
   getPlayers,
   getRolls,
 } from "./helpers";
-import { useModal } from "./Modal";
 import { Track } from "./Track";
 import { Bets } from "./Bets";
 import { LongBets, FinalLongBets } from "./LongBets";
@@ -23,13 +21,11 @@ import { PlayerName, Player } from "./Player";
 import "./App.css";
 
 function getCookie() {
-  var cookie = localStorage.getItem("camelCookie");
-  if (cookie) {
-    return cookie;
+  let cookie = localStorage.getItem("camelCookie");
+  if (!cookie) {
+    cookie = uuidv4();
+    localStorage.setItem("camelCookie", cookie);
   }
-
-  var cookie = uuidv4();
-  localStorage.setItem("camelCookie", cookie);
   return cookie;
 }
 
@@ -67,6 +63,9 @@ function makeSocket(gameId, onEvent) {
             });
         }
         break;
+      default:
+        console.error("unknown event");
+        return;
     }
     _nEvents += 1;
     onEvent(_nEvents);
@@ -82,13 +81,13 @@ function makeSocket(gameId, onEvent) {
 function Game(props) {
   const { id } = props;
   // "nevents" is a hack to force rerender
-  const [nEvents, setNEvents] = useState(0);
+  const setNEvents = useState(0)[1];
   const [s] = useState(() => {
     return makeSocket(id, (n) => {
       setNEvents(n);
     });
   });
-  const { socket, handleEvent, getGameState, getAssignedPlayer, getStatus } = s;
+  const { socket, getGameState, getAssignedPlayer, getStatus } = s;
 
   const emitEvent = (type, data) => {
     if (!getGameState()?.currentPlayer) {
@@ -227,6 +226,7 @@ function Game(props) {
           <div>
             {getPlayers(getGameState()).map((p, i) => (
               <Player
+                key={(i + 1).toString()}
                 number={i + 1}
                 player={p}
                 active={isActive(i)}

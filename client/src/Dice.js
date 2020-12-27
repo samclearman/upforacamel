@@ -8,12 +8,12 @@ function Die(props) {
     width: "30px",
     height: "25px",
     paddingTop: "5px",
-    color: camelToTextColor(parseInt(camel)),
     display: "inline-block",
     textAlign: "center",
   };
 
   if (!blank) {
+    dieStyle.color = camelToTextColor(parseInt(camel));
     dieStyle.background = camelToColor(parseInt(camel));
     dieStyle.border = "1px solid black";
   } else {
@@ -30,7 +30,7 @@ function Die(props) {
 export function Dice(props) {
   const { rolled, onRoll } = props;
   const renderedDice = rolled.map(({ camel, number }, i) => (
-    <Die i={i} camel={camel} roll={number} />
+    <Die key={camel} i={i} camel={camel} roll={number} />
   ));
   const diceStyle = {};
   return (

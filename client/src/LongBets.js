@@ -45,7 +45,7 @@ function LongBetButton(props) {
   };
   const [renderModal, showLongBetModal] = useModal();
   const renderedAvailableLongBets = available.map((c, i) => (
-    <LongBet i={i} camel={c} onClick={() => onPlace(c)} />
+    <LongBet key={c} i={i} camel={c} onClick={() => onPlace(c)} />
   ));
   return (
     <div style={style} onClick={showLongBetModal}>
@@ -67,12 +67,13 @@ export function FinalLongBets(props) {
   const renderedToLose = toLose.map(({ player, camel }, i) => (
     <LongBet player={player} i={i} camel={camel} />
   ));
-
+  const toWinLabel = "🏅";
+  const toLoseLabel = "🐌";
   return (
     <div>
-      <h3>🏅</h3>
+      <h3>{toWinLabel}</h3>
       <div>{renderedToWin}</div>
-      <h3>🐌</h3>
+      <h3>{toLoseLabel}</h3>
       <div>{renderedToLose}</div>
     </div>
   );
@@ -81,9 +82,10 @@ export function FinalLongBets(props) {
 export function LongBets(props) {
   const { toWin, toLose, available, onPlace } = props;
   const renderedToWin = toWin
-    .map(({ player: p }, i) => <LongBet i={i} player={p} />)
+    .map(({ player: p }, i) => <LongBet key={i} i={i} player={p} />)
     .concat(
       <LongBetButton
+        key={toWin.length}
         available={available}
         onPlace={(camel) => onPlace("toWin", camel)}
       >
@@ -91,9 +93,10 @@ export function LongBets(props) {
       </LongBetButton>
     );
   const renderedToLose = toLose
-    .map(({ player: p }, i) => <LongBet player={p} i={i} />)
+    .map(({ player: p }, i) => <LongBet key={i} i={i} player={p} />)
     .concat(
       <LongBetButton
+        key={toLose.length}
         available={available}
         onPlace={(camel) => onPlace("toLose", camel)}
       >

@@ -70,14 +70,18 @@ export function Player(props) {
     display: "inline",
     marginLeft: "10px",
   };
+  const moneyLabel = "💰";
   return (
     <div>
       <h3>
         {nameComponent}
-        <div style={moneyStyle}>💰{player.money}</div>
+        <div style={moneyStyle}>
+          {moneyLabel}
+          {player.money}
+        </div>
       </h3>
 
-      <div class="player-bets">
+      <div>
         <div>{renderedBets}</div>
       </div>
     </div>

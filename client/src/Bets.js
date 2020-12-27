@@ -36,11 +36,11 @@ export function Bet(props) {
 export function Bets(props) {
   const { available, onPlace } = props;
   const renderedBets = available.map((a, i) => (
-    <Bet i={i} camel={i + 1} bet={a} onPlace={() => onPlace(i + 1)} />
+    <Bet key={i} i={i} camel={i + 1} bet={a} onPlace={() => onPlace(i + 1)} />
   ));
   return (
     <div>
-      <div class="available-round-bets">{renderedBets}</div>
+      <div>{renderedBets}</div>
     </div>
   );
 }
