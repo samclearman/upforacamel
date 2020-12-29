@@ -80,7 +80,8 @@ function Crowd(props) {
     textAlign: "center",
     border: "1px solid black",
     fontSize: `calc(${tileSide} - 5px)`,
-    lineHeight: tileSide,
+      lineHeight: tileSide,
+      cursor: 'pointer',
   };
   if (!crowd) {
     innerStyle.border = "1px solid white";
