@@ -16,7 +16,8 @@ function LongBet(props) {
   const color = camel ? camelToColor(camel) : playerNumberToColor(player);
   const longBetStyle = {
     ...longBetStyleBase,
-    border: "1px solid black",
+      border: "1px solid black",
+      cursor: 'inherit',
   };
   if (camel && player) {
     longBetStyle.background = `linear-gradient(0deg, ${camelToColor(
