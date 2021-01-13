@@ -310,7 +310,7 @@ function pickBlackOrWhiteCamel(track, rolledDiceColor) {
       // both camels are carrying other camels
       if (blackCamelsToMove[1] === "white") {
         camelColor = "white";
-      } else if (whiteCamelsToMove[1] === "white") {
+      } else if (whiteCamelsToMove[1] === "black") {
         camelColor = "black";
       } else {
         camelColor = rolledDiceColor;
