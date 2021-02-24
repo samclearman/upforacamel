@@ -69,6 +69,12 @@ export function reduceEvent(gameState, event) {
     (parseInt(gameState.currentPlayer) % gameState.numberPlayers) +
     1
   ).toString();
+  while (!gameState.players[gameState.currentPlayer]) {
+    gameState.currentPlayer = (
+      (parseInt(gameState.currentPlayer) % gameState.numberPlayers) +
+      1
+    ).toString();
+  }
 }
 
 function validateEvent(gameState, event) {
@@ -604,6 +610,16 @@ export function updateDisplayName(gameState, player, displayName) {
   //   return;
   // }
   gameState.players[player].displayName = displayName;
+}
+
+export function removePlayer(gameState, player) {
+  if (gameState.status !== "init") {
+    console.log(
+      `Invalid update. Players cannot be removed in a ${gameState.status} game`
+    );
+    return;
+  }
+  delete gameState.players[player];
 }
 
 var initialPlayerLegState = {

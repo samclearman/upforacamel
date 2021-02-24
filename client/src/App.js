@@ -129,6 +129,10 @@ function Game(props) {
     socket.emit("change_name", { player, displayName });
   };
 
+  const removePlayer = (player) => {
+    socket.emit("remove_player", { player });
+  };
+
   const roll = () => {
     emitEvent("rollDice", {});
   };
@@ -152,6 +156,10 @@ function Game(props) {
   const startButtonStyle = {
     marginTop: "30px",
   };
+  const removeButtonStyle = {
+    marginLeft: "10px",
+    color: "red",
+  };
   const yourTurnStyle = {
     color: "white",
     backgroundColor: "black",
@@ -173,17 +181,29 @@ function Game(props) {
       <div style={{ textAlign: "center" }}>
         <h3>Players</h3>
         <div>
-          {getPlayers(getGameState()).map((p, i) => (
-            <h3 key={i}>
-              <PlayerName
-                number={i + 1}
-                player={p}
-                active={isActive(i)}
-                editable={(i + 1).toString() === getAssignedPlayer()}
-                changeName={changeName}
-              />
-            </h3>
-          ))}
+          {getPlayers(getGameState()).map((p, i) => {
+            const isSelf = (i + 1).toString() === getAssignedPlayer();
+            return (
+              <h3 key={i}>
+                <PlayerName
+                  number={i + 1}
+                  player={p}
+                  editable={isSelf}
+                  changeName={changeName}
+                />
+                {!isSelf && (
+                  <button
+                    style={removeButtonStyle}
+                    onClick={() => {
+                      removePlayer(i + 1);
+                    }}
+                  >
+                    remove
+                  </button>
+                )}
+              </h3>
+            );
+          })}
         </div>
         <button style={startButtonStyle} onClick={startGame}>
           Start game

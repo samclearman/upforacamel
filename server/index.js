@@ -9,6 +9,7 @@ import {
   reduceEvent,
   redactGameState,
   updateDisplayName,
+  removePlayer,
 } from "./reducer.js";
 
 const app = express();
@@ -102,6 +103,13 @@ const changeName = (observerId, player, displayName) => {
   issueUpdate(gameId);
 };
 
+const remove = (observerId, player) => {
+  const gameId = gameObservers[observerId];
+  const game = games[gameId];
+  removePlayer(game.state, player);
+  issueUpdate(gameId);
+};
+
 io.on("connection", (socket) => {
   console.log("connection", socket.id);
 
@@ -118,6 +126,10 @@ io.on("connection", (socket) => {
 
     socket.on("change_name", ({ player, displayName }) => {
       changeName(observerId, player, displayName);
+    });
+
+    socket.on("remove_player", ({ player }) => {
+      remove(observerId, player);
     });
 
     socket.on("event", (event) => {
