@@ -162,10 +162,13 @@ export function getAvailableLongBets(gameState, player) {
 }
 
 export function getPlayers(gameState) {
-  if (!gameState) {
+  if (!(gameState && gameState.players)) {
     return [];
   }
-  return Object.entries(gameState.players).map(([n, p]) => {
+  const players = [];
+  for (const k in gameState.players) {
+    const p = gameState.players[k];
+
     const lastLeg = Object.values(p.legs).slice(-1)[0];
     const bets = [];
     if (gameState.status === "inprogress") {
@@ -179,10 +182,11 @@ export function getPlayers(gameState) {
       .map((leg) => leg.score || 0)
       .reduce((x, y) => x + y);
     if (gameState.finalScore) {
-      money = gameState.finalScore[n] || 0;
+      money = gameState.finalScore[k] || 0;
     }
-    return { name: p.displayName, money, bets };
-  });
+    players[parseInt(k) - 1] = { name: p.displayName, money, bets };
+  }
+  return players;
 }
 
 export function getRolls(gameState) {
