@@ -104,6 +104,10 @@ function Game(props) {
     return getGameState()?.currentPlayer === (player + 1).toString();
   };
 
+  const isLeader = () => {
+    return getAssignedPlayer() === "1";
+  };
+
   const placeBet = (camel) => {
     emitEvent("makeLegBet", { color: camelToColor(camel) });
   };
@@ -191,7 +195,7 @@ function Game(props) {
                   editable={isSelf}
                   changeName={changeName}
                 />
-                {!isSelf && (
+                {!isSelf && isLeader() && (
                   <button
                     style={removeButtonStyle}
                     onClick={() => {
@@ -205,9 +209,11 @@ function Game(props) {
             );
           })}
         </div>
-        <button style={startButtonStyle} onClick={startGame}>
-          Start game
-        </button>
+        {isLeader() && (
+          <button style={startButtonStyle} onClick={startGame}>
+            Start game
+          </button>
+        )}
       </div>
     );
   } else if (getStatus() === "inprogress") {
