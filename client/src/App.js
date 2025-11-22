@@ -316,17 +316,6 @@ function Game(props) {
           toLose={getLongBets(getGameState()).toLose}
           toWin={getLongBets(getGameState()).toWin}
         />
-
-        <div
-          style={{
-            marginLeft: "auto",
-            marginRight: "auto",
-            width: "fit-content",
-            marginTop: "20px",
-          }}
-        >
-          <LegResults results={getLegResults(getGameState())} />
-        </div>
       </div>
     );
   }
