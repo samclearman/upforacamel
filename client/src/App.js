@@ -12,12 +12,14 @@ import {
   getAvailableLongBets,
   getPlayers,
   getRolls,
+  getLegResults,
 } from "./helpers";
 import { Track } from "./Track";
 import { Bets } from "./Bets";
 import { LongBets, FinalLongBets } from "./LongBets";
 import { Dice } from "./Dice";
 import { PlayerName, Player } from "./Player";
+import { LegResults } from "./LegResults";
 import "./App.css";
 
 function getCookie() {
@@ -154,8 +156,14 @@ function Game(props) {
   };
   const playersStyle = {
     marginLeft: "3px",
+    marginRight: "30px",
     maxWidth: "250px",
-    //marginLeft: "30px",
+  };
+  const legResultsStyle = {
+    marginLeft: "3px",
+    marginRight: "30px",
+    // opacity: 0.6,
+    // filter: "brightness(1.5) saturate(0.3)",
   };
   const startButtonStyle = {
     marginTop: "30px",
@@ -246,6 +254,7 @@ function Game(props) {
 
           <h3>Rolls</h3>
           <Dice rolled={getRolls(getGameState())} onRoll={roll} />
+
         </div>
 
         <div style={playersStyle}>
@@ -262,6 +271,13 @@ function Game(props) {
             ))}
           </div>
         </div>
+
+        { getGameState().currentLegNum > 0 && (
+          <div style={legResultsStyle}>
+            <h3 style={{ marginTop: "27px"}}>Leg results</h3>
+            <LegResults results={getLegResults(getGameState())} />
+          </div>
+        ) }
       </div>
     );
   } else if (getStatus() === "ended") {
@@ -300,6 +316,17 @@ function Game(props) {
           toLose={getLongBets(getGameState()).toLose}
           toWin={getLongBets(getGameState()).toWin}
         />
+
+        <div
+          style={{
+            marginLeft: "auto",
+            marginRight: "auto",
+            width: "fit-content",
+            marginTop: "20px",
+          }}
+        >
+          <LegResults results={getLegResults(getGameState())} />
+        </div>
       </div>
     );
   }

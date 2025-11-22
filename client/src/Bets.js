@@ -17,6 +17,10 @@ export function Bet(props) {
     Object.assign(betStyle, {
       color: camelToTextColor(camel),
       backgroundColor: camelToColor(camel),
+    });
+  }
+  if (bet && onPlace) {
+    Object.assign(betStyle, {
       cursor: "pointer",
     });
   }

@@ -11,7 +11,7 @@ export function playerNumberToColor(n) {
   ][n - 1];
 }
 
-function camelToNumber(camelColor) {
+export function camelToNumber(camelColor) {
   switch (camelColor) {
     case "red":
       return 1;
@@ -200,4 +200,83 @@ export function getRolls(gameState) {
       player: parseInt(player),
     })
   );
+}
+
+export function getLegResults(gameState) {
+  if (!gameState || !gameState.players) {
+    return [];
+  }
+
+  const results = [];
+
+  // Iterate through completed legs (all legs before current one)
+  for (let legNum = 0; legNum < gameState.currentLegNum; legNum++) {
+    const leg = gameState.legs[legNum];
+    const winnerCamel = leg.winner;
+    const runnerUpCamel = leg.runnerUp;
+
+    const legResults = {
+      legNumber: legNum + 1,
+      winner: winnerCamel,
+      runnerUp: runnerUpCamel,
+      players: []
+    };
+
+    // Get results for each player in this leg
+    for (const playerId in gameState.players) {
+      const player = gameState.players[playerId];
+      const legData = player.legs[legNum];
+
+      if (!legData) continue;
+
+      // Calculate detailed bet information
+      const bets = [];
+      let totalBetPoints = 0;
+
+      for (const color in legData.legBets) {
+        for (const betValue of legData.legBets[color]) {
+          let payout = 0;
+          let result = "lost";
+
+          if (color === winnerCamel) {
+            payout = betValue;
+            result = "won";
+            totalBetPoints += betValue;
+          } else if (color === runnerUpCamel) {
+            payout = 1;
+            result = "second";
+            totalBetPoints += 1;
+          } else {
+            payout = -1;
+            result = "lost";
+            totalBetPoints -= 1;
+          }
+
+          bets.push({
+            color: color,
+            betValue: betValue,
+            payout: payout,
+            result: result
+          });
+        }
+      }
+
+      const rollPoints = legData.rolls;
+      const desertTilePoints = legData.score - rollPoints - Math.max(0, totalBetPoints);
+
+      legResults.players.push({
+        playerId: parseInt(playerId),
+        name: player.displayName,
+        totalScore: legData.score,
+        rollPoints: rollPoints,
+        betPoints: totalBetPoints,
+        desertTilePoints: desertTilePoints,
+        bets: bets
+      });
+    }
+
+    results.push(legResults);
+  }
+
+  return results;
 }

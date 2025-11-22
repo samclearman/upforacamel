@@ -546,6 +546,11 @@ function getLoserCamel(gameState) {
 
 function scoreLeg(gameState, winnerCamel, runnerUpCamel) {
   const currentLegNum = gameState.currentLegNum;
+
+  // Store the winner and runner-up for this leg
+  gameState.legs[currentLegNum].winner = winnerCamel;
+  gameState.legs[currentLegNum].runnerUp = runnerUpCamel;
+
   for (var i = 1; i <= gameState.numberPlayers; i++) {
     var maxPartnerPayoff = 0;
     var playerPosition = gameState.players[i]["legs"][currentLegNum];
