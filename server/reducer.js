@@ -502,6 +502,7 @@ function updatePlayerScoreDesertTile(gameState, camelPosition) {
       gameState.players[i + 1]["legs"][gameState.currentLegNum].desertTile;
     if (Math.abs(desertTile) == camelPosition) {
       gameState.players[i + 1]["legs"][gameState.currentLegNum]["score"] += 1;
+      gameState.players[i + 1]["legs"][gameState.currentLegNum]["desertTilePoints"] += 1;
       foundTileOwner = true;
     }
   }
@@ -639,6 +640,7 @@ var initialPlayerLegState = {
   rolls: 0,
   desertTile: -100, // -100 means unused
   score: 0,
+  desertTilePoints: 0, // this is only used for the leg results board
 };
 
 var initialPlayerState = {

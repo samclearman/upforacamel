@@ -262,7 +262,7 @@ export function getLegResults(gameState) {
       }
 
       const rollPoints = legData.rolls;
-      const desertTilePoints = legData.score - rollPoints - Math.max(0, totalBetPoints);
+      const desertTilePoints = legData.desertTilePoints;
 
       legResults.players.push({
         playerId: parseInt(playerId),
